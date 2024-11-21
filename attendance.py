@@ -34,7 +34,7 @@ def process_attendance_data(data):
     data.loc[qualified_data.index, 'Attendance_Status'] = 'Qualified'
     data.loc[potentially_present_data.index, 'Attendance_Status'] = 'Potentially Present'
     
-    return data
+    return data, qualified_data, potentially_present_data, absent_data
 
 # If a file is uploaded
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -44,7 +44,7 @@ if uploaded_file:
     data = pd.read_csv(uploaded_file)
     
     # Process attendance data
-    processed_data = process_attendance_data(data)
+    processed_data, qualified_data, potentially_present_data, absent_data = process_attendance_data(data)
 
     # Display the filtered data with students who have responded and attended for more than 110 minutes
     st.title("Attendance Report")
@@ -60,13 +60,17 @@ if uploaded_file:
         st.write("### Student Attendance Status")
         st.pyplot(fig)
 
-        # Display a single bar chart for all students showing their attendance duration distribution
-        fig, ax = plt.subplots(figsize=(10, 6))
-        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potentially Present': '#FF9800', 'Absent': '#F44336'}, ax=ax)
-        ax.set_title("Attendance Duration Distribution")
-        ax.set_xlabel("Duration (minutes)")
-        ax.set_ylabel("Frequency")
-        st.pyplot(fig)
+        # Show details of Qualified students
+        st.write("### Qualified Students (Attended > 110 minutes and Responded OK)")
+        st.write(qualified_data)
+
+        # Show details of Potentially Present students
+        st.write("### Potentially Present Students (Attended between 80-110 minutes and Responded OK)")
+        st.write(potentially_present_data)
+
+        # Show details of Absent students
+        st.write("### Absent Students (Did not respond or attended < 80 minutes)")
+        st.write(absent_data)
 
     else:
         st.warning("No students qualify for attendance based on the given criteria.")
