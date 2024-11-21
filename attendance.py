@@ -8,10 +8,10 @@ if uploaded_file:
     # Load data
     data = pd.read_csv(uploaded_file)
     
-    # Display columns to check if 'Join_Time' and 'Leave_Time' exist
+    # Display columns to check what is in the CSV
     st.write("Columns in the uploaded CSV file:", data.columns)
     
-    # Ensure 'Join_Time' and 'Leave_Time' columns exist
+    # Check if 'Join_Time' and 'Leave_Time' are in the file
     if 'Join_Time' in data.columns and 'Leave_Time' in data.columns:
         # Parse these as datetime
         data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
@@ -45,4 +45,5 @@ if uploaded_file:
         st.error("CSV file is missing required columns: 'Join_Time' and 'Leave_Time'. Please check the CSV file.")
 else:
     st.warning("Please upload a CSV file to proceed.")
+
 
