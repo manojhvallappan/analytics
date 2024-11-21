@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import Image
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -31,7 +32,12 @@ def process_attendance_data(data):
     # Filter students who have not responded or attended for less than 80 minutes
     absent_data = data[~data.index.isin(qualified_data.index) & ~data.index.isin(potentially_present_data.index)]
     
-    return qualified_data, potentially_present_data, absent_data
+    # Add a column to categorize students as Qualified, Potentially Present, or Absent
+    data['Attendance_Status'] = 'Absent'
+    data.loc[qualified_data.index, 'Attendance_Status'] = 'Qualified'
+    data.loc[potentially_present_data.index, 'Attendance_Status'] = 'Potentially Present'
+    
+    return data
 
 # If a file is uploaded
 if uploaded_file:
@@ -39,53 +45,39 @@ if uploaded_file:
     data = pd.read_csv(uploaded_file)
     
     # Process attendance data
-    qualified_data, potentially_present_data, absent_data = process_attendance_data(data)
+    processed_data = process_attendance_data(data)
 
     # Display the filtered data with students who have responded and attended for more than 110 minutes
     st.title("Attendance Report")
 
     # Display pie chart for qualified, potentially present, and absent students
-    if len(qualified_data) > 0 or len(potentially_present_data) > 0 or len(absent_data) > 0:
+    if len(processed_data) > 0:
         # Pie chart data
-        status_labels = ['Qualified Students', 'Potentially Present Students', 'Absent Students']
-        status_counts = [len(qualified_data), len(potentially_present_data), len(absent_data)]
+        status_counts = processed_data['Attendance_Status'].value_counts()
 
         fig, ax = plt.subplots()
-        ax.pie(status_counts, labels=status_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800', '#F44336'])
+        ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800', '#F44336'])
         ax.axis('equal')  # Equal aspect ratio ensures the pie is circular.
         st.write("### Student Attendance Status")
         st.pyplot(fig)
 
-        # Display bar chart for the distribution of attendance duration
-        if len(qualified_data) > 0:
-            st.write("### Duration Distribution for Qualified Students (Attendance > 110 minutes)")
-            fig, ax = plt.subplots()
-            sns.histplot(qualified_data['Duration_Minutes'], bins=10, kde=True, color='#4CAF50', ax=ax)
-            ax.set_title("Attendance Duration for Qualified Students")
-            ax.set_xlabel("Duration (minutes)")
-            ax.set_ylabel("Frequency")
-            st.pyplot(fig)
-
-        if len(potentially_present_data) > 0:
-            st.write("### Duration Distribution for Potentially Present Students (Attendance 80-110 minutes)")
-            fig, ax = plt.subplots()
-            sns.histplot(potentially_present_data['Duration_Minutes'], bins=10, kde=True, color='#FF9800', ax=ax)
-            ax.set_title("Attendance Duration for Potentially Present Students")
-            ax.set_xlabel("Duration (minutes)")
-            ax.set_ylabel("Frequency")
-            st.pyplot(fig)
-
-        if len(absent_data) > 0:
-            st.write("### Duration Distribution for Absent Students (Attendance < 80 minutes or No Response)")
-            fig, ax = plt.subplots()
-            sns.histplot(absent_data['Duration_Minutes'], bins=10, kde=True, color='#F44336', ax=ax)
-            ax.set_title("Attendance Duration for Absent Students")
-            ax.set_xlabel("Duration (minutes)")
-            ax.set_ylabel("Frequency")
-            st.pyplot(fig)
+        # Display a single bar chart for all students showing their attendance duration distribution
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potentially Present': '#FF9800', 'Absent': '#F44336'}, ax=ax)
+        ax.set_title("Attendance Duration Distribution")
+        ax.set_xlabel("Duration (minutes)")
+        ax.set_ylabel("Frequency")
+        st.pyplot(fig)
 
     else:
         st.warning("No students qualify for attendance based on the given criteria.")
+
+    # Add image at the bottom with "Done by" text
+    image = Image.open(r'C:\Users\manoj\photoss\mano.jpg')  # Adjust the image name as needed
+    st.image(image, use_column_width=True)
+    st.markdown("### Done by Manojh Vallappan")
+
 else:
     st.warning("Please upload a CSV file to proceed.")
+
 
