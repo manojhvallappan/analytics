@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from PIL import Image
 
 # Function to calculate duration and filter based on the criteria
 def process_attendance_data(data):
@@ -60,6 +59,12 @@ if uploaded_file:
         st.write("### Student Attendance Status")
         st.pyplot(fig)
 
+        # Display number of students in each category
+        st.write(f"### Number of Students in Each Category:")
+        st.write(f"Qualified Students (Attended > 110 minutes and Responded OK): {len(qualified_data)}")
+        st.write(f"Potentially Present Students (Attended between 80-110 minutes and Responded OK): {len(potentially_present_data)}")
+        st.write(f"Absent Students (Did not respond or attended < 80 minutes): {len(absent_data)}")
+
         # Show details of Qualified students
         st.write("### Qualified Students (Attended > 110 minutes and Responded OK)")
         st.write(qualified_data)
@@ -74,11 +79,6 @@ if uploaded_file:
 
     else:
         st.warning("No students qualify for attendance based on the given criteria.")
-
-    # Add image at the bottom with "Done by" text
-    image = Image.open('photoss/mano.jpg')  # Adjusted to use relative path
-    st.image(image, use_column_width=True)
-    st.markdown("### Done by Manojh Vallappan")
 
 else:
     st.warning("Please upload a CSV file to proceed.")
