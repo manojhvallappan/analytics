@@ -4,9 +4,6 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from PIL import Image
 
-# File uploader
-uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
-
 # Function to calculate duration and filter based on the criteria
 def process_attendance_data(data):
     # Rename columns for consistency
@@ -40,6 +37,8 @@ def process_attendance_data(data):
     return data
 
 # If a file is uploaded
+uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
+
 if uploaded_file:
     # Read the CSV file into a DataFrame
     data = pd.read_csv(uploaded_file)
@@ -63,21 +62,7 @@ if uploaded_file:
 
         # Display a single bar chart for all students showing their attendance duration distribution
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potentially Present': '#FF9800', 'Absent': '#F44336'}, ax=ax)
-        ax.set_title("Attendance Duration Distribution")
-        ax.set_xlabel("Duration (minutes)")
-        ax.set_ylabel("Frequency")
-        st.pyplot(fig)
+        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potential
 
-    else:
-        st.warning("No students qualify for attendance based on the given criteria.")
-
-    # Add image at the bottom with "Done by" text
-    image = Image.open(r'C:\Users\manoj\photoss\mano.jpg')  # Adjust the image name as needed
-    st.image(image, use_column_width=True)
-    st.markdown("### Done by Manojh Vallappan")
-
-else:
-    st.warning("Please upload a CSV file to proceed.")
 
 
