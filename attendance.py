@@ -28,7 +28,10 @@ def process_attendance_data(data):
     # Filter students who have responded with "OK" to the disclaimer and attended for 80+ minutes but <= 110 minutes
     potentially_present_data = data[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 80) & (data['Duration_Minutes'] <= 110)]
     
-    return qualified_data, potentially_present_data
+    # Filter students who have not responded or attended for less than 80 minutes
+    absent_data = data[~data.index.isin(qualified_data.index) & ~data.index.isin(potentially_present_data.index)]
+    
+    return qualified_data, potentially_present_data, absent_data
 
 # If a file is uploaded
 if uploaded_file:
@@ -36,19 +39,19 @@ if uploaded_file:
     data = pd.read_csv(uploaded_file)
     
     # Process attendance data
-    qualified_data, potentially_present_data = process_attendance_data(data)
+    qualified_data, potentially_present_data, absent_data = process_attendance_data(data)
 
     # Display the filtered data with students who have responded and attended for more than 110 minutes
     st.title("Attendance Report")
 
-    # Display pie chart for qualified vs potentially present students
-    if len(qualified_data) > 0 or len(potentially_present_data) > 0:
+    # Display pie chart for qualified, potentially present, and absent students
+    if len(qualified_data) > 0 or len(potentially_present_data) > 0 or len(absent_data) > 0:
         # Pie chart data
-        status_labels = ['Qualified Students', 'Potentially Present Students']
-        status_counts = [len(qualified_data), len(potentially_present_data)]
+        status_labels = ['Qualified Students', 'Potentially Present Students', 'Absent Students']
+        status_counts = [len(qualified_data), len(potentially_present_data), len(absent_data)]
 
         fig, ax = plt.subplots()
-        ax.pie(status_counts, labels=status_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800'])
+        ax.pie(status_counts, labels=status_labels, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800', '#F44336'])
         ax.axis('equal')  # Equal aspect ratio ensures the pie is circular.
         st.write("### Student Attendance Status")
         st.pyplot(fig)
@@ -72,9 +75,17 @@ if uploaded_file:
             ax.set_ylabel("Frequency")
             st.pyplot(fig)
 
+        if len(absent_data) > 0:
+            st.write("### Duration Distribution for Absent Students (Attendance < 80 minutes or No Response)")
+            fig, ax = plt.subplots()
+            sns.histplot(absent_data['Duration_Minutes'], bins=10, kde=True, color='#F44336', ax=ax)
+            ax.set_title("Attendance Duration for Absent Students")
+            ax.set_xlabel("Duration (minutes)")
+            ax.set_ylabel("Frequency")
+            st.pyplot(fig)
+
     else:
         st.warning("No students qualify for attendance based on the given criteria.")
 else:
     st.warning("Please upload a CSV file to proceed.")
-
 
