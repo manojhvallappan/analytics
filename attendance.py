@@ -35,6 +35,24 @@ def process_attendance_data(data):
     
     return data, qualified_data, potentially_present_data, absent_data
 
+# Add a custom header
+st.markdown("""
+    <style>
+        .header {
+            text-align: center;
+            font-size: 30px;
+            color: #4CAF50;
+            font-weight: bold;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 10px;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+# Display title and custom header
+st.markdown('<div class="header">Attendance Dashboard</div>', unsafe_allow_html=True)
+
 # If a file is uploaded
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
@@ -46,14 +64,14 @@ if uploaded_file:
     processed_data, qualified_data, potentially_present_data, absent_data = process_attendance_data(data)
 
     # Display the filtered data with students who have responded and attended for more than 110 minutes
-    st.title("Attendance Report")
+    st.subheader("Attendance Report")
 
     # Display pie chart for qualified, potentially present, and absent students
     if len(processed_data) > 0:
         # Pie chart data
         status_counts = processed_data['Attendance_Status'].value_counts()
 
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=(6, 6))
         ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800', '#F44336'])
         ax.axis('equal')  # Equal aspect ratio ensures the pie is circular.
         st.write("### Student Attendance Status")
@@ -61,25 +79,34 @@ if uploaded_file:
 
         # Display number of students in each category
         st.write(f"### Number of Students in Each Category:")
-        st.write(f"Qualified Students (Attended > 110 minutes and Responded OK): {len(qualified_data)}")
-        st.write(f"Potentially Present Students (Attended between 80-110 minutes and Responded OK): {len(potentially_present_data)}")
-        st.write(f"Absent Students (Did not respond or attended < 80 minutes): {len(absent_data)}")
+        st.markdown(f"**Qualified Students**: {len(qualified_data)} (Attended > 110 minutes and Responded OK)")
+        st.markdown(f"**Potentially Present Students**: {len(potentially_present_data)} (Attended between 80-110 minutes and Responded OK)")
+        st.markdown(f"**Absent Students**: {len(absent_data)} (Did not respond or attended < 80 minutes)")
+
+        # Add some spacing for clarity
+        st.markdown("<hr>", unsafe_allow_html=True)
 
         # Show details of Qualified students
         st.write("### Qualified Students (Attended > 110 minutes and Responded OK)")
-        st.write(qualified_data)
+        st.dataframe(qualified_data)
+
+        # Add some spacing
+        st.markdown("<hr>", unsafe_allow_html=True)
 
         # Show details of Potentially Present students
         st.write("### Potentially Present Students (Attended between 80-110 minutes and Responded OK)")
-        st.write(potentially_present_data)
+        st.dataframe(potentially_present_data)
+
+        # Add some spacing
+        st.markdown("<hr>", unsafe_allow_html=True)
 
         # Show details of Absent students
         st.write("### Absent Students (Did not respond or attended < 80 minutes)")
-        st.write(absent_data)
+        st.dataframe(absent_data)
 
     else:
         st.warning("No students qualify for attendance based on the given criteria.")
-
 else:
     st.warning("Please upload a CSV file to proceed.")
+
 
