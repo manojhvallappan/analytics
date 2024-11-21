@@ -62,7 +62,20 @@ if uploaded_file:
 
         # Display a single bar chart for all students showing their attendance duration distribution
         fig, ax = plt.subplots(figsize=(10, 6))
-        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potential
+        sns.histplot(data=processed_data, x='Duration_Minutes', hue='Attendance_Status', bins=15, kde=True, palette={'Qualified': '#4CAF50', 'Potentially Present': '#FF9800', 'Absent': '#F44336'}, ax=ax)
+        ax.set_title("Attendance Duration Distribution")
+        ax.set_xlabel("Duration (minutes)")
+        ax.set_ylabel("Frequency")
+        st.pyplot(fig)
 
+    else:
+        st.warning("No students qualify for attendance based on the given criteria.")
 
+    # Add image at the bottom with "Done by" text
+    image = Image.open('photoss/mano.jpg')  # Adjusted to use relative path
+    st.image(image, use_column_width=True)
+    st.markdown("### Done by Manojh Vallappan")
+
+else:
+    st.warning("Please upload a CSV file to proceed.")
 
