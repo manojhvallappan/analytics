@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 # Function to calculate duration and filter based on the criteria
 def process_attendance_data(data):
@@ -72,7 +71,8 @@ if uploaded_file:
         status_counts = processed_data['Attendance_Status'].value_counts()
 
         fig, ax = plt.subplots(figsize=(6, 6))
-        ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90, colors=['#4CAF50', '#FF9800', '#F44336'])
+        colors = {'Qualified': '#4CAF50', 'Potentially Present': '#2196F3', 'Absent': '#F44336'}
+        ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in status_counts.index])
         ax.axis('equal')  # Equal aspect ratio ensures the pie is circular.
         st.write("### Student Attendance Status")
         st.pyplot(fig)
