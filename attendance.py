@@ -18,8 +18,8 @@ def process_attendance_data(data):
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
     # Filter categories
-    qualified_data = data[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 110)]
-    potentially_present_data = data[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 80) & (data['Duration_Minutes'] <= 110)]
+    qualified_data = data[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 101)]
+    potentially_present_data = data[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 80) & (data['Duration_Minutes'] <= 101)]
     absent_data = data[~data.index.isin(qualified_data.index) & ~data.index.isin(potentially_present_data.index)]
 
     # Add attendance status
@@ -105,7 +105,7 @@ if uploaded_file:
 
     # Qualified Students
     if len(qualified_data) > 0:
-        st.markdown("**Qualified Students (Attended > 110 mins and Responded OK):**")
+        st.markdown("**Qualified Students (Attended > 101 mins and Responded OK):**")
         st.dataframe(qualified_data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
     else:
         st.markdown("No students qualified.")
@@ -114,7 +114,7 @@ if uploaded_file:
 
     # Potentially Present Students
     if len(potentially_present_data) > 0:
-        st.markdown("**Potentially Present Students (Attended 80–110 mins and Responded OK):**")
+        st.markdown("**Potentially Present Students (Attended 80–101 mins and Responded OK):**")
         st.dataframe(potentially_present_data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
     else:
         st.markdown("No potentially present students.")
@@ -130,3 +130,4 @@ if uploaded_file:
 
 else:
     st.warning("Please upload a CSV file to proceed.")
+
