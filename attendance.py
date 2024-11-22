@@ -33,31 +33,46 @@ def process_attendance_data(data):
 st.markdown("""
     <style>
         body {
-            background-color: #f9f9f9;
+            background-color: #f0f8ff;
         }
         .header {
             text-align: center;
-            font-size: 36px;
+            font-size: 40px;
             font-weight: bold;
             color: #4CAF50;
             margin-bottom: 30px;
+            text-shadow: 2px 2px 4px #888888;
         }
         .subheader {
-            color: #333;
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
+            color: #333333;
         }
         .card {
-            background-color: #f4f4f4;
+            background-color: #ffffff;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        hr {
-            border: none;
-            border-top: 2px solid #ddd;
-            margin: 20px 0;
+        .stat-box {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+        }
+        .qualified {
+            background-color: #4CAF50;
+        }
+        .potential {
+            background-color: #2196F3;
+        }
+        .absent {
+            background-color: #F44336;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -80,21 +95,19 @@ if uploaded_file:
         'Absent': len(absent_data),
     }
 
-    # Display overview
-    st.markdown('<div class="subheader">Overview</div>', unsafe_allow_html=True)
-    st.markdown(f"""
-    <div class="card">
-        <b>Total Students:</b> {len(processed_data)} <br>
-        <b>Qualified Students:</b> {counts['Qualified']} <br>
-        <b>Potentially Present Students:</b> {counts['Potentially Present']} <br>
-        <b>Absent Students:</b> {counts['Absent']}
-    </div>
-    """, unsafe_allow_html=True)
+    # Display stats in a single row
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown('<div class="stat-box qualified">Qualified Students<br>' + str(counts['Qualified']) + '</div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div class="stat-box potential">Potentially Present<br>' + str(counts['Potentially Present']) + '</div>', unsafe_allow_html=True)
+    with col3:
+        st.markdown('<div class="stat-box absent">Absent Students<br>' + str(counts['Absent']) + '</div>', unsafe_allow_html=True)
 
     # Pie chart
     st.markdown('<div class="subheader">Attendance Status Distribution</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
-    colors = {'Qualified': '#4CAF50', 'Potentially Present': '#2196F3', 'Absent': '#F44336'}
+    colors = {'Qualified': '#4CAF50', 'Potentially Present': '#2196F3', 'Absent': '#F44336'}  # Green, Blue, Red
     status_counts = processed_data['Attendance_Status'].value_counts()
     ax.pie(status_counts, labels=status_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in status_counts.index])
     ax.axis('equal')
@@ -102,32 +115,12 @@ if uploaded_file:
 
     # Display detailed data
     st.markdown('<div class="subheader">Student Details</div>', unsafe_allow_html=True)
-
-    # Qualified Students
-    if len(qualified_data) > 0:
-        st.markdown("**Qualified Students (Attended > 101 mins and Responded OK):**")
+    with st.expander("Qualified Students (Attended > 101 mins and Responded OK)"):
         st.dataframe(qualified_data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    else:
-        st.markdown("No students qualified.")
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # Potentially Present Students
-    if len(potentially_present_data) > 0:
-        st.markdown("**Potentially Present Students (Attended 80–101 mins and Responded OK):**")
+    with st.expander("Potentially Present Students (Attended 80–101 mins and Responded OK)"):
         st.dataframe(potentially_present_data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    else:
-        st.markdown("No potentially present students.")
-
-    st.markdown("<hr>", unsafe_allow_html=True)
-
-    # Absent Students
-    if len(absent_data) > 0:
-        st.markdown("**Absent Students (Attended < 80 mins or Did Not Respond):**")
+    with st.expander("Absent Students (Attended < 80 mins or Did Not Respond)"):
         st.dataframe(absent_data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    else:
-        st.markdown("No absent students.")
 
 else:
     st.warning("Please upload a CSV file to proceed.")
-
