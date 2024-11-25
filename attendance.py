@@ -22,6 +22,7 @@ def process_attendance_data(data):
 
     return data
 
+# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
@@ -39,7 +40,7 @@ st.markdown("""
             font-weight: bold;
             margin-top: 30px;
             margin-bottom: 10px;
-            color: #333333;
+            color: #F44336; /* Red color for section titles */
         }
         .stat-box {
             text-align: center;
@@ -75,18 +76,22 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
+# Display dashboard title
+st.markdown('<div class="header">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
 
+# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
-   
+    # Read and process the data
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
 
+    # Attendance counts by category
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
+    # Overview Section
+    st.markdown('<div class="section-title">Attendance Overview</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
             <div class="stat-box green">101–150 mins<br>{}</div>
@@ -103,7 +108,8 @@ if uploaded_file:
         category_counts.get('No Response', 0),
     ), unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
+    # Pie Chart Section
+    st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
         '101–150 mins': '#4CAF50',
@@ -116,7 +122,8 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
+    # Detailed Data Section
+    st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
     with st.expander("View 101–150 mins (Qualified Students)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
     with st.expander("View 51–100 mins (Moderately Attended)"):
@@ -130,5 +137,3 @@ if uploaded_file:
 
 else:
     st.warning("Please upload a CSV file to proceed.")
-
-   
