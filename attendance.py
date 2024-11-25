@@ -75,7 +75,7 @@ if uploaded_file:
     st.plotly_chart(fig2)
 
     # Table for Detailed Data (Can be collapsed into an expander to save space)
-    with st.beta_expander("View Detailed Attendance Data"):
+    with st.expander("View Detailed Attendance Data"):
         st.dataframe(data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Attendance_Category']])
 
 else:
