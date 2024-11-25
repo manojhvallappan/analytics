@@ -75,7 +75,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
