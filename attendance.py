@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 # Function to process attendance data
 def process_attendance_data(data):
@@ -81,7 +82,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Display dashboard title
-st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -113,7 +114,7 @@ if uploaded_file:
     ), unsafe_allow_html=True)
 
     # Pie Chart Section
-    st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Attendance Distribution (Pie Chart)</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
         '101–150 mins': '#4CAF50',
@@ -125,6 +126,15 @@ if uploaded_file:
     ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
     ax.axis('equal')
     st.pyplot(fig)
+
+    # Bar Chart Section
+    st.markdown('<div class="section-title">Attendance Distribution (Bar Chart)</div>', unsafe_allow_html=True)
+    bar_fig, bar_ax = plt.subplots(figsize=(8, 5))
+    sns.barplot(x=category_counts.index, y=category_counts.values, palette=colors, ax=bar_ax)
+    bar_ax.set_title("Attendance by Category")
+    bar_ax.set_xlabel("Attendance Category")
+    bar_ax.set_ylabel("Number of Students")
+    st.pyplot(bar_fig)
 
     # Detailed Data Section
     st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
@@ -141,5 +151,3 @@ if uploaded_file:
 
 else:
     st.warning("Please upload a CSV file to proceed.")
-
-    
