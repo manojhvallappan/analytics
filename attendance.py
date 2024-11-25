@@ -86,7 +86,7 @@ if uploaded_file:
 
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    st.markdown('<div class="section-title">Attendance Overview</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
             <div class="stat-box green">101–150 mins<br>{}</div>
