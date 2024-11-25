@@ -61,22 +61,22 @@ if uploaded_file:
     with col3:
         st.metric("No Response", data['Attendance_Category'].isna().sum())
 
-    # Attendance Categories Breakdown
+    # Attendance Categories Breakdown (Smaller chart size)
     st.markdown("<div class='section'><h4>Attendance Breakdown</h4></div>", unsafe_allow_html=True)
     attendance_counts = data['Attendance_Category'].value_counts().sort_index()
     fig1 = px.bar(attendance_counts, x=attendance_counts.index, y=attendance_counts.values, color=attendance_counts.index,
-                  labels={'x': 'Category', 'y': 'Count'}, title="Attendance Categories")
+                  labels={'x': 'Category', 'y': 'Count'}, title="Attendance Categories", height=300)
     st.plotly_chart(fig1)
 
-    # Pie Chart for Attendance Distribution
+    # Pie Chart for Attendance Distribution (Smaller chart size)
     st.markdown("<div class='section'><h4>Attendance Distribution</h4></div>", unsafe_allow_html=True)
     fig2 = px.pie(values=attendance_counts.values, names=attendance_counts.index, title="Category Distribution",
-                  color_discrete_sequence=px.colors.sequential.RdBu)
+                  color_discrete_sequence=px.colors.sequential.RdBu, height=300)
     st.plotly_chart(fig2)
 
-    # Table for Detailed Data
-    st.markdown("<div class='section'><h4>Detailed Attendance Data</h4></div>", unsafe_allow_html=True)
-    st.dataframe(data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Attendance_Category']])
+    # Table for Detailed Data (Can be collapsed into an expander to save space)
+    with st.beta_expander("View Detailed Attendance Data"):
+        st.dataframe(data[['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Attendance_Category']])
 
 else:
     st.warning("Please upload a CSV file to see the dashboard.")
