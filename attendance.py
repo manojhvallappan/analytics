@@ -31,7 +31,7 @@ st.markdown("""
             text-align: center;
             font-size: 36px;
             font-weight: bold;
-            color: #4CAF50;
+            color: #FF9800;  /* Orange color for header */
             margin-bottom: 20px;
         }
         .section-title {
