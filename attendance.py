@@ -103,7 +103,7 @@ if uploaded_file:
         category_counts.get('No Response', 0),
     ), unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
         '101–150 mins': '#4CAF50',
@@ -116,7 +116,7 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
     with st.expander("View 101–150 mins (Qualified Students)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
     with st.expander("View 51–100 mins (Moderately Attended)"):
