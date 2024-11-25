@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to process attendance data
 def process_attendance_data(data):
     data.rename(columns={
         'Join time': 'Join_Time',
@@ -10,14 +9,11 @@ def process_attendance_data(data):
         'Recording disclaimer response': 'Responded',
     }, inplace=True)
     
-    # Convert 'Join_Time' and 'Leave_Time' to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
     
-    # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Categorize attendance
     data['Attendance_Category'] = 'No Response'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100) & (data['Duration_Minutes'] <= 150), 'Attendance_Category'] = '101–150 mins'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 50) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '51–100 mins'
@@ -26,7 +22,6 @@ def process_attendance_data(data):
 
     return data
 
-# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
@@ -80,21 +75,17 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Display dashboard title
 st.markdown('<div class="header">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
 
-# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
-    # Read and process the data
+   
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
 
-    # Attendance counts by category
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    # Overview Section
     st.markdown('<div class="section-title">Attendance Overview</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
@@ -112,7 +103,6 @@ if uploaded_file:
         category_counts.get('No Response', 0),
     ), unsafe_allow_html=True)
 
-    # Pie Chart Section
     st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
@@ -126,7 +116,6 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    # Detailed Data Section
     st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
     with st.expander("View 101–150 mins (Qualified Students)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
