@@ -25,39 +25,32 @@ def process_attendance_data(data):
 
     return data
 
-# Add custom styles
+# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
-            background-color: #f0f8ff;
+            background-color: #f9f9f9;
         }
         .header {
             text-align: center;
-            font-size: 40px;
+            font-size: 36px;
             font-weight: bold;
             color: #4CAF50;
-            margin-bottom: 30px;
-            text-shadow: 2px 2px 4px #888888;
+            margin-bottom: 20px;
         }
-        .subheader {
-            font-size: 24px;
+        .section-title {
+            font-size: 20px;
             font-weight: bold;
+            margin-top: 30px;
             margin-bottom: 10px;
             color: #333333;
         }
-        .card {
-            background-color: #ffffff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
         .stat-box {
             text-align: center;
-            padding: 20px;
+            padding: 15px;
             border-radius: 10px;
             margin: 10px;
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: white;
         }
@@ -73,11 +66,18 @@ st.markdown("""
         .red {
             background-color: #F44336;
         }
+        .card {
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
     </style>
 """, unsafe_allow_html=True)
 
 # Display dashboard title
-st.markdown('<div class="header">Attendance Dashboard</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -90,19 +90,24 @@ if uploaded_file:
     # Attendance counts by category
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    # Display stats in a single row
-    col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown('<div class="stat-box green">> 100 mins<br>' + str(category_counts.get('> 100 mins', 0)) + '</div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown('<div class="stat-box blue">50–100 mins<br>' + str(category_counts.get('50–100 mins', 0)) + '</div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown('<div class="stat-box yellow">10–50 mins<br>' + str(category_counts.get('10–50 mins', 0)) + '</div>', unsafe_allow_html=True)
-    with col4:
-        st.markdown('<div class="stat-box red">No Response or < 10 mins<br>' + str(category_counts.get('No Response or < 10 mins', 0)) + '</div>', unsafe_allow_html=True)
+    # Overview Section
+    st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
+            <div class="stat-box green">> 100 mins<br>{}</div>
+            <div class="stat-box blue">50–100 mins<br>{}</div>
+            <div class="stat-box yellow">10–50 mins<br>{}</div>
+            <div class="stat-box red">No Response or < 10 mins<br>{}</div>
+        </div>
+    """.format(
+        category_counts.get('> 100 mins', 0),
+        category_counts.get('50–100 mins', 0),
+        category_counts.get('10–50 mins', 0),
+        category_counts.get('No Response or < 10 mins', 0),
+    ), unsafe_allow_html=True)
 
-    # Pie chart
-    st.markdown('<div class="subheader">Attendance Status Distribution</div>', unsafe_allow_html=True)
+    # Pie Chart Section
+    st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
         '> 100 mins': '#4CAF50', 
@@ -114,25 +119,16 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    # Display detailed data in columns
-    st.markdown('<div class="subheader">Detailed Attendance Data</div>', unsafe_allow_html=True)
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.markdown("**> 100 mins**")
+    # Detailed Data Section
+    st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
+    with st.expander("View > 100 mins (Qualified Students)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '> 100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-        st.markdown("**50–100 mins**")
+    with st.expander("View 50–100 mins (Potentially Present Students)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '50–100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    
-    with col2:
-        st.markdown("**10–50 mins**")
+    with st.expander("View 10–50 mins (Short Duration Attendance)"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == '10–50 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-        st.markdown("**No Response or < 10 mins**")
+    with st.expander("View No Response or < 10 mins"):
         st.dataframe(processed_data[processed_data['Attendance_Category'] == 'No Response or < 10 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
-
-   
-  
-
