@@ -17,11 +17,12 @@ def process_attendance_data(data):
     # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Create attendance categories
-    data['Attendance_Category'] = 'No Response or < 10 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = '> 100 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 50) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '50–100 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 10) & (data['Duration_Minutes'] < 50), 'Attendance_Category'] = '10–50 mins'
+    # Categorize attendance
+    data['Attendance_Category'] = 'No Response'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100) & (data['Duration_Minutes'] <= 150), 'Attendance_Category'] = '101–150 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 50) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '51–100 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 10) & (data['Duration_Minutes'] <= 50), 'Attendance_Category'] = '11–50 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 0) & (data['Duration_Minutes'] <= 10), 'Attendance_Category'] = '1–10 mins'
 
     return data
 
@@ -63,6 +64,9 @@ st.markdown("""
         .yellow {
             background-color: #FFC107;
         }
+        .orange {
+            background-color: #FF9800;
+        }
         .red {
             background-color: #F44336;
         }
@@ -91,29 +95,32 @@ if uploaded_file:
     category_counts = processed_data['Attendance_Category'].value_counts()
 
     # Overview Section
-    st.markdown('<div class="section-title">Overview</div>', unsafe_allow_html=True)
+    st.markdown('<div class="section-title">Attendance Overview</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
-            <div class="stat-box green">> 100 mins<br>{}</div>
-            <div class="stat-box blue">50–100 mins<br>{}</div>
-            <div class="stat-box yellow">10–50 mins<br>{}</div>
-            <div class="stat-box red">No Response or < 10 mins<br>{}</div>
+            <div class="stat-box green">101–150 mins<br>{}</div>
+            <div class="stat-box blue">51–100 mins<br>{}</div>
+            <div class="stat-box yellow">11–50 mins<br>{}</div>
+            <div class="stat-box orange">1–10 mins<br>{}</div>
+            <div class="stat-box red">No Response<br>{}</div>
         </div>
     """.format(
-        category_counts.get('> 100 mins', 0),
-        category_counts.get('50–100 mins', 0),
-        category_counts.get('10–50 mins', 0),
-        category_counts.get('No Response or < 10 mins', 0),
+        category_counts.get('101–150 mins', 0),
+        category_counts.get('51–100 mins', 0),
+        category_counts.get('11–50 mins', 0),
+        category_counts.get('1–10 mins', 0),
+        category_counts.get('No Response', 0),
     ), unsafe_allow_html=True)
 
     # Pie Chart Section
     st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
-        '> 100 mins': '#4CAF50', 
-        '50–100 mins': '#2196F3', 
-        '10–50 mins': '#FFC107', 
-        'No Response or < 10 mins': '#F44336'
+        '101–150 mins': '#4CAF50',
+        '51–100 mins': '#2196F3',
+        '11–50 mins': '#FFC107',
+        '1–10 mins': '#FF9800',
+        'No Response': '#F44336'
     }
     ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
     ax.axis('equal')
@@ -121,14 +128,18 @@ if uploaded_file:
 
     # Detailed Data Section
     st.markdown('<div class="section-title">Detailed Attendance Data</div>', unsafe_allow_html=True)
-    with st.expander("View > 100 mins (Qualified Students)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '> 100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View 50–100 mins (Potentially Present Students)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '50–100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View 10–50 mins (Short Duration Attendance)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '10–50 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View No Response or < 10 mins"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'No Response or < 10 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 101–150 mins (Qualified Students)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 51–100 mins (Moderately Attended)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '51–100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 11–50 mins (Short Duration Attendance)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '11–50 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 1–10 mins (Very Short Attendance)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '1–10 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View No Response"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'No Response'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
+
+    
