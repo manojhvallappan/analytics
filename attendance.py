@@ -14,11 +14,10 @@ def process_attendance_data(data):
     
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    data['Attendance_Category'] = 'No Response'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100) & (data['Duration_Minutes'] <= 150), 'Attendance_Category'] = '101–150 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 50) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '51–100 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 10) & (data['Duration_Minutes'] <= 50), 'Attendance_Category'] = '11–50 mins'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 0) & (data['Duration_Minutes'] <= 10), 'Attendance_Category'] = '1–10 mins'
+    # Categorizing based on new attendance criteria
+    data['Attendance_Category'] = 'Absent'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present'
 
     return data
 
@@ -77,7 +76,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Display dashboard title
-st.markdown('<div class="header">PROFESSIOAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -94,29 +93,23 @@ if uploaded_file:
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
-            <div class="stat-box green">101–150 mins<br>{}</div>
-            <div class="stat-box blue">51–100 mins<br>{}</div>
-            <div class="stat-box yellow">11–50 mins<br>{}</div>
-            <div class="stat-box orange">1–10 mins<br>{}</div>
-            <div class="stat-box red">No Response<br>{}</div>
+            <div class="stat-box green">Full Present<br>{}</div>
+            <div class="stat-box blue">Potentially Present<br>{}</div>
+            <div class="stat-box red">Absent<br>{}</div>
         </div>
     """.format(
-        category_counts.get('101–150 mins', 0),
-        category_counts.get('51–100 mins', 0),
-        category_counts.get('11–50 mins', 0),
-        category_counts.get('1–10 mins', 0),
-        category_counts.get('No Response', 0),
+        category_counts.get('Full Present', 0),
+        category_counts.get('Potentially Present', 0),
+        category_counts.get('Absent', 0),
     ), unsafe_allow_html=True)
 
     # Pie Chart Section
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
-        '101–150 mins': '#4CAF50',
-        '51–100 mins': '#2196F3',
-        '11–50 mins': '#FFC107',
-        '1–10 mins': '#FF9800',
-        'No Response': '#F44336'
+        'Full Present': '#4CAF50',
+        'Potentially Present': '#2196F3',
+        'Absent': '#F44336'
     }
     ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
     ax.axis('equal')
@@ -124,16 +117,12 @@ if uploaded_file:
 
     # Detailed Data Section
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
-    with st.expander("View 101–150 mins (Qualified Students)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View 51–100 mins (Moderately Attended)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '51–100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View 11–50 mins (Short Duration Attendance)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '11–50 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View 1–10 mins (Very Short Attendance)"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == '1–10 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
-    with st.expander("View No Response"):
-        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'No Response'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View Full Present (100+ mins with OK Response)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'Full Present'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View Potentially Present (70-100 mins with OK Response)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'Potentially Present'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View Absent (No Response or Less than 70 mins)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'Absent'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
