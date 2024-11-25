@@ -50,20 +50,14 @@ st.markdown("""
             font-weight: bold;
             color: white;
         }
-        .green {
-            background-color: #4CAF50;
-        }
-        .blue {
-            background-color: #2196F3;
+        .purple {
+            background-color: #9C27B0;
         }
         .yellow {
-            background-color: #FFC107;
+            background-color: #FFEB3B;
         }
-        .orange {
-            background-color: #FF9800;
-        }
-        .red {
-            background-color: #F44336;
+        .pink {
+            background-color: #E91E63;
         }
         .card {
             background-color: #ffffff;
@@ -93,9 +87,9 @@ if uploaded_file:
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown("""
         <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
-            <div class="stat-box green">Full Present<br>{}</div>
-            <div class="stat-box blue">Potentially Present<br>{}</div>
-            <div class="stat-box red">Absent<br>{}</div>
+            <div class="stat-box purple">Full Present<br>{}</div>
+            <div class="stat-box yellow">Potentially Present<br>{}</div>
+            <div class="stat-box pink">Absent<br>{}</div>
         </div>
     """.format(
         category_counts.get('Full Present', 0),
@@ -107,9 +101,9 @@ if uploaded_file:
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(6, 6))
     colors = {
-        'Full Present': '#4CAF50',
-        'Potentially Present': '#2196F3',
-        'Absent': '#F44336'
+        'Full Present': '#9C27B0',  # Purple
+        'Potentially Present': '#FFEB3B',  # Yellow
+        'Absent': '#E91E63'  # Pink
     }
     ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
     ax.axis('equal')
