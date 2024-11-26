@@ -22,6 +22,7 @@ def process_attendance_data(data):
     return data
 
 # Add custom styles for a professional look
+# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
@@ -31,7 +32,7 @@ st.markdown("""
             text-align: center;
             font-size: 36px;
             font-weight: bold;
-            color: #FF9800;  /* Orange color for header */
+            color: #E91E63;  /* Pinkish color for header */
             margin-bottom: 20px;
         }
         .section-title {
