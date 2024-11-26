@@ -12,7 +12,7 @@ st.markdown("""
             text-align: center;
             font-size: 28px;
             font-weight: bold;
-            color: #34495e;
+            color: #34495e; /* Dark blue color for header */
             margin-bottom: 30px;
         }
         .sidebar-title {
@@ -29,14 +29,15 @@ st.markdown("""
             border-radius: 10px;
             padding: 20px;
             margin: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
         }
         .small-card {
             text-align: center;
             padding: 15px;
             font-size: 16px;
             font-weight: bold;
-            color: #2c3e50;
+            color: #2c3e50; /* Text color */
+            border-radius: 5px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -57,7 +58,7 @@ data = pd.DataFrame({
     "Values": [30, 20, 25, 25]
 })
 
-# Layout: 3 columns (Example)
+# Layout: 3 columns
 col1, col2, col3 = st.columns(3)
 
 with col1:
