@@ -23,6 +23,7 @@ def process_attendance_data(data):
 
 # Add custom styles for a professional look
 # Add custom styles for a professional look
+# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
@@ -40,7 +41,7 @@ st.markdown("""
             font-weight: bold;
             margin-top: 30px;
             margin-bottom: 10px;
-            color: #F44336; /* Red color for section titles */
+            color: #8BC34A; /* Light green for section titles */
         }
         .stat-box {
             text-align: center;
@@ -72,6 +73,16 @@ st.markdown("""
 
 # Display dashboard title
 st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
+
+# Overview Section Title
+st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
+
+# Distribution Section Title
+st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
+
+# Detailed Data Section Title
+st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
+
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
