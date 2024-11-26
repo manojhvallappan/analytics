@@ -2,107 +2,97 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Custom CSS for dark theme
+# Add custom CSS for professional styling
 st.markdown("""
     <style>
         body {
-            background-color: #1e1e1e; /* Dark background */
-            color: #ffffff; /* White text */
+            background-color: #f0f4f7; /* Light blue background */
         }
         .header {
             text-align: center;
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
-            color: #f39c12; /* Vibrant orange header */
-            margin-bottom: 20px;
+            color: #34495e; /* Dark blue color for header */
+            margin-bottom: 30px;
+        }
+        .sidebar-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: #ffffff;
+            text-align: center;
+            padding: 15px 0;
+            background-color: #2ecc71; /* Green sidebar title background */
+            border-radius: 10px;
         }
         .card {
-            background-color: #2c3e50; /* Dark gray card background */
+            background-color: #ffffff;
             border-radius: 10px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        .small-card {
+            text-align: center;
             padding: 15px;
-            margin: 15px 0;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-        }
-        .chart-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
-            color: #e74c3c; /* Red for chart titles */
-            text-align: center;
-            margin-bottom: 10px;
-        }
-        .small-stat {
-            text-align: center;
-            font-size: 24px;
-            font-weight: bold;
-            padding: 10px;
-            color: #ffffff; /* White text */
-            border-radius: 8px;
-        }
-        .stat-green {
-            background-color: #27ae60; /* Green stat card */
-        }
-        .stat-blue {
-            background-color: #2980b9; /* Blue stat card */
-        }
-        .stat-yellow {
-            background-color: #f1c40f; /* Yellow stat card */
+            color: #2c3e50; /* Text color */
+            border-radius: 5px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Header
-st.markdown('<div class="header">Professional Dark-Themed Dashboard</div>', unsafe_allow_html=True)
+# Sidebar
+st.sidebar.markdown('<div class="sidebar-title">Navigation</div>', unsafe_allow_html=True)
+st.sidebar.button("Overview")
+st.sidebar.button("Reports")
+st.sidebar.button("Settings")
+st.sidebar.button("Help")
 
-# Sample Data
+# Header
+st.markdown('<div class="header">Professional Dashboard</div>', unsafe_allow_html=True)
+
+# Example data for visualization
 data = pd.DataFrame({
-    "Category": ["Completed", "In Progress", "Pending", "Overdue"],
-    "Values": [759, 457, 123, 95]
+    "Category": ["A", "B", "C", "D"],
+    "Values": [30, 20, 25, 25]
 })
 
-# Layout: Multiple Rows
-# First row: Two Pie Charts
-col1, col2 = st.columns(2)
+# Layout: 3 columns
+col1, col2, col3 = st.columns(3)
+
 with col1:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="chart-title">Task Status Distribution</div>', unsafe_allow_html=True)
-    fig1, ax1 = plt.subplots()
-    ax1.pie(data['Values'], labels=data['Category'], autopct='%1.1f%%', startangle=90, colors=["#27ae60", "#3498db", "#f1c40f", "#e74c3c"])
-    ax1.axis('equal')  # Equal aspect ratio ensures a circular pie chart
-    st.pyplot(fig1)
+    st.subheader("Pie Chart")
+    fig, ax = plt.subplots()
+    ax.pie(data['Values'], labels=data['Category'], autopct="%1.1f%%", startangle=90)
+    st.pyplot(fig)
     st.markdown('</div>', unsafe_allow_html=True)
 
 with col2:
     st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.markdown('<div class="chart-title">Task Completion Progress</div>', unsafe_allow_html=True)
-    fig2, ax2 = plt.subplots()
-    ax2.pie([75, 25], labels=["Completed", "Remaining"], autopct='%1.1f%%', startangle=90, colors=["#27ae60", "#e74c3c"])
-    ax2.axis('equal')
-    st.pyplot(fig2)
+    st.subheader("Line Chart")
+    fig, ax = plt.subplots()
+    ax.plot(data['Category'], data['Values'], marker="o", linestyle="--", color="#1f77b4")
+    st.pyplot(fig)
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Second Row: Line Chart
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.markdown('<div class="chart-title">Task Progress Over Time</div>', unsafe_allow_html=True)
-fig3, ax3 = plt.subplots()
-ax3.plot(range(1, 11), [5, 10, 15, 20, 25, 30, 40, 50, 70, 100], marker="o", linestyle="--", color="#f39c12")
-ax3.set_title("Progress Over Time", color="#ffffff")
-ax3.set_facecolor("#2c3e50")
-ax3.spines['bottom'].set_color('#ffffff')
-ax3.spines['left'].set_color('#ffffff')
-ax3.tick_params(axis='x', colors='#ffffff')
-ax3.tick_params(axis='y', colors='#ffffff')
-st.pyplot(fig3)
-st.markdown('</div>', unsafe_allow_html=True)
-
-# Third Row: Summary Stats
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.markdown('<div class="chart-title">Summary Statistics</div>', unsafe_allow_html=True)
-col3, col4, col5 = st.columns(3)
-
 with col3:
-    st.markdown('<div class="small-stat stat-green">Total: 759</div>', unsafe_allow_html=True)
-with col4:
-    st.markdown('<div class="small-stat stat-blue">Completed: 457</div>', unsafe_allow_html=True)
-with col5:
-    st.markdown('<div class="small-stat stat-yellow">Pending: 123</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card">', unsafe_allow_html=True)
+    st.subheader("Bar Chart")
+    fig, ax = plt.subplots()
+    ax.bar(data['Category'], data['Values'], color="#2ecc71")
+    st.pyplot(fig)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# Summary Statistics Section
+st.markdown('<div class="card">', unsafe_allow_html=True)
+st.subheader("Summary Statistics")
+st.markdown(f"""
+    <div style="display: flex; justify-content: space-evenly;">
+        <div class="small-card" style="background-color: #f1c40f;">Total: {sum(data['Values'])}</div>
+        <div class="small-card" style="background-color: #3498db;">Max: {max(data['Values'])}</div>
+        <div class="small-card" style="background-color: #e74c3c;">Min: {min(data['Values'])}</div>
+    </div>
+""", unsafe_allow_html=True)
 st.markdown('</div>', unsafe_allow_html=True)
