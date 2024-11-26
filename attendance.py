@@ -74,16 +74,6 @@ st.markdown("""
 # Display dashboard title
 st.markdown('<div class="header">PROFESSIONAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
 
-# Overview Section Title
-st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
-
-# Distribution Section Title
-st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
-
-# Detailed Data Section Title
-st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
-
-
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
