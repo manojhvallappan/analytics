@@ -9,14 +9,11 @@ def process_attendance_data(data):
         'Recording disclaimer response': 'Responded',
     }, inplace=True)
 
-    # Convert Join_Time and Leave_Time to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
 
-    # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Categorize attendance based on duration and response
     data['Attendance_Category'] = 'No Response'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (Above 100 mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
@@ -24,7 +21,6 @@ def process_attendance_data(data):
 
     return data
 
-# Streamlit UI setup
 st.markdown("""
     <style>
         .header { text-align: center; font-size: 36px; color: #ff69b4; }
@@ -37,10 +33,8 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Dashboard header
 st.markdown('<div class="header">ZOOM ONILNE ATTEDNDANCE ANALYTICS</div>', unsafe_allow_html=True)
 
-# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
@@ -48,7 +42,6 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    # Attendance overview in separate columns
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown(f"""
         <div style="display: flex; justify-content: space-evenly;">
@@ -59,7 +52,6 @@ if uploaded_file:
         </div>
     """, unsafe_allow_html=True)
 
-    # Attendance distribution pie chart
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(8, 8))
     colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
@@ -73,7 +65,6 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    # Expandable detailed sections for each category
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
     for category in ['Full Present (Above 100 mins)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
