@@ -47,7 +47,7 @@ if uploaded_file:
         <div style="display: flex; justify-content: space-evenly;">
             <div class="stat-box green">Full Present (Above 100 mins)<br>{category_counts.get('Full Present (Above 100 mins)', 0)}</div>
             <div class="stat-box yellow">Potentially Present (70-100 mins)<br>{category_counts.get('Potentially Present (70-100 mins)', 0)}</div>
-            <div class="stat-box orange">Short Attendance (Below 70 mins)<br>{category_counts.get('Absentees (Below 70 mins)', 0)}</div>
+            <div class="stat-box orange">Absentees (Below 70 mins)<br>{category_counts.get('Absentees (Below 70 mins)', 0)}</div>
             <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
         </div>
     """, unsafe_allow_html=True)
