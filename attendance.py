@@ -2,7 +2,6 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to process and categorize attendance data
 def process_attendance_data(data):
     data.rename(columns={
         'Join time': 'Join_Time',
@@ -10,36 +9,31 @@ def process_attendance_data(data):
         'Recording disclaimer response': 'Responded',
     }, inplace=True)
 
-    # Convert time columns to datetime
+    # Convert Join_Time and Leave_Time to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
 
     # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Categorize attendance into the specified ranges
+    # Categorize attendance based on time duration and response
     data['Attendance_Category'] = 'No Response'
-    data.loc[(data['Duration_Minutes'] > 101) & (data['Duration_Minutes'] <= 150), 'Attendance_Category'] = '101-150 mins'
-    data.loc[(data['Duration_Minutes'] >= 51) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '51-100 mins'
-    data.loc[(data['Duration_Minutes'] >= 11) & (data['Duration_Minutes'] <= 50), 'Attendance_Category'] = '11-50 mins'
-    data.loc[(data['Duration_Minutes'] >= 1) & (data['Duration_Minutes'] < 11), 'Attendance_Category'] = '1-10 mins'
-
-    # Identify no response category if Responded is not 'OK'
-    data.loc[data['Responded'] != 'OK', 'Attendance_Category'] = 'No Response'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (Above 100 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (71-100 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] <= 70), 'Attendance_Category'] = 'Short Attendance (1-70 mins)'
 
     return data
 
-# Custom CSS styling
+# Streamlit UI setup
 st.markdown("""
     <style>
         .header { text-align: center; font-size: 36px; color: #ff69b4; }
         .section-title { font-size: 24px; color: #32CD32; }
         .stat-box { padding: 10px; margin: 5px; border-radius: 5px; }
-        .blue { background-color: #ADD8E6; }
         .green { background-color: #98FB98; }
-        .orange { background-color: #FFDAB9; }
+        .yellow { background-color: #FFD700; }
+        .orange { background-color: #FFA07A; }
         .red { background-color: #FFC0CB; }
-        .gray { background-color: #D3D3D3; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -58,18 +52,17 @@ if uploaded_file:
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown(f"""
         <div style="display: flex; justify-content: space-evenly;">
-            <div class="stat-box blue">101-150 mins<br>{category_counts.get('101-150 mins', 0)}</div>
-            <div class="stat-box green">51-100 mins<br>{category_counts.get('51-100 mins', 0)}</div>
-            <div class="stat-box orange">11-50 mins<br>{category_counts.get('11-50 mins', 0)}</div>
-            <div class="stat-box red">1-10 mins<br>{category_counts.get('1-10 mins', 0)}</div>
-            <div class="stat-box gray">No Response<br>{category_counts.get('No Response', 0)}</div>
+            <div class="stat-box green">Full Present (Above 100 mins)<br>{category_counts.get('Full Present (Above 100 mins)', 0)}</div>
+            <div class="stat-box yellow">Potentially Present (71-100 mins)<br>{category_counts.get('Potentially Present (71-100 mins)', 0)}</div>
+            <div class="stat-box orange">Short Attendance (1-70 mins)<br>{category_counts.get('Short Attendance (1-70 mins)', 0)}</div>
+            <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
         </div>
     """, unsafe_allow_html=True)
 
     # Attendance distribution pie chart
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(8, 8))
-    colors = ['#ADD8E6', '#98FB98', '#FFDAB9', '#FFC0CB', '#D3D3D3']
+    colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
     ax.pie(
         category_counts, 
         labels=category_counts.index, 
@@ -83,7 +76,7 @@ if uploaded_file:
     # Expandable detailed sections for each category
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
-    for category in ['101-150 mins', '51-100 mins', '11-50 mins', '1-10 mins', 'No Response']:
+    for category in ['Full Present (Above 100 mins)', 'Potentially Present (71-100 mins)', 'Short Attendance (1-70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
             st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
