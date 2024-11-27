@@ -3,74 +3,76 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def process_attendance_data(data):
-    data.rename(columns={
-        'Join time': 'Join_Time',
-        'Leave time': 'Leave_Time',
-        'Recording disclaimer response': 'Responded',
-    }, inplace=True)
-
-    data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
-    data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
-
+    # Data Processing and Categorization
+    data['Join_Time'] = pd.to_datetime(data['Join time'], errors='coerce')
+    data['Leave_Time'] = pd.to_datetime(data['Leave time'], errors='coerce')
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
+    # Categorize Attendance
     data['Attendance_Category'] = 'No Response'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (Above 100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
-
+    data.loc[(data['Recording disclaimer response'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present'
+    data.loc[(data['Recording disclaimer response'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present'
+    data.loc[(data['Recording disclaimer response'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance'
     return data
 
+# CSS for styling
 st.markdown("""
     <style>
-        .header { text-align: center; font-size: 36px; color: #ff69b4; }
-        .section-title { font-size: 24px; color: #32CD32; }
-        .stat-box { padding: 10px; margin: 5px; border-radius: 5px; }
-        .green { background-color: #98FB98; }
-        .yellow { background-color: #FFD700; }
-        .orange { background-color: #FFA07A; }
-        .red { background-color: #FFC0CB; }
+        .main-title { text-align: center; font-size: 36px; color: #007BFF; margin-bottom: 30px; }
+        .section-title { font-size: 24px; color: #28a745; margin-top: 20px; }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">STUDENT ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
+# Dashboard Title
+st.markdown('<div class="main-title">Professional Attendance Dashboard</div>', unsafe_allow_html=True)
 
+# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
+    # Data Processing
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
+
+    # Attendance Data by Category
+    full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present']
+    potentially_present_data = processed_data[processed_data['Attendance_Category'] == 'Potentially Present']
+    short_attendance_data = processed_data[processed_data['Attendance_Category'] == 'Short Attendance']
+    no_response_data = processed_data[processed_data['Attendance_Category'] == 'No Response']
+
+    # Tabs for separate category tables
+    tab1, tab2, tab3, tab4 = st.tabs(["Full Present", "Potentially Present", "Short Attendance", "No Response"])
+
+    with tab1:
+        st.markdown('<div class="section-title">Full Present (Above 100 mins)</div>', unsafe_allow_html=True)
+        st.dataframe(full_present_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+
+    with tab2:
+        st.markdown('<div class="section-title">Potentially Present (70–100 mins)</div>', unsafe_allow_html=True)
+        st.dataframe(potentially_present_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+
+    with tab3:
+        st.markdown('<div class="section-title">Short Attendance (Below 70 mins)</div>', unsafe_allow_html=True)
+        st.dataframe(short_attendance_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+
+    with tab4:
+        st.markdown('<div class="section-title">No Response</div>', unsafe_allow_html=True)
+        st.dataframe(no_response_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+
+    # Summary Distribution Chart
+    st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
-    st.markdown(f"""
-        <div style="display: flex; justify-content: space-evenly;">
-            <div class="stat-box green">Full Present (Above 100 mins)<br>{category_counts.get('Full Present (Above 100 mins)', 0)}</div>
-            <div class="stat-box yellow">Potentially Present (70-100 mins)<br>{category_counts.get('Potentially Present (70-100 mins)', 0)}</div>
-            <div class="stat-box orange">Short Attendance (Below 70 mins)<br>{category_counts.get('Short Attendance (Below 70 mins)', 0)}</div>
-            <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
-        </div>
-    """, unsafe_allow_html=True)
-
-    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
-    ax.pie(
-        category_counts, 
-        labels=category_counts.index, 
-        autopct='%1.1f%%', 
-        startangle=90, 
-        colors=colors
-    )
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = {
+        'Full Present': '#28a745',        # Green
+        'Potentially Present': '#8a2be2', # Purple
+        'Short Attendance': '#FFD700',    # Yellow
+        'No Response': '#DC3545'          # Red
+    }
+    ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
     ax.axis('equal')
     st.pyplot(fig)
 
-    st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
-
-    for category in ['Full Present (Above 100 mins)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
-        with st.expander(f"View {category}"):
-            filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
-
 else:
-    st.warning("Please upload a CSV file to proceed.")
+    st.warning("Please upload a CSV file to view the dashboard.")
