@@ -2,4 +2,5 @@ pandas
 python
 streamlit
 matplotlib
-HTML/CSS
+HTML
+CSS
