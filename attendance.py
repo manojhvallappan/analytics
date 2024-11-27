@@ -2,97 +2,138 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Add custom CSS for professional styling
+def process_attendance_data(data):
+    data.rename(columns={
+        'Join time': 'Join_Time',
+        'Leave time': 'Leave_Time',
+        'Recording disclaimer response': 'Responded',
+    }, inplace=True)
+    
+    data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
+    data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
+    
+    data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
+
+    data['Attendance_Category'] = 'No Response'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100) & (data['Duration_Minutes'] <= 150), 'Attendance_Category'] = '101–150 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 50) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = '51–100 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 10) & (data['Duration_Minutes'] <= 50), 'Attendance_Category'] = '11–50 mins'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 0) & (data['Duration_Minutes'] <= 10), 'Attendance_Category'] = '1–10 mins'
+
+    return data
+
+# Add custom styles for a professional look
 st.markdown("""
     <style>
         body {
-            background-color: #f0f4f7; /* Light blue background */
+            background-color: #f9f9f9;
         }
         .header {
             text-align: center;
-            font-size: 28px;
+            font-size: 36px;
             font-weight: bold;
-            color: #34495e; /* Dark blue color for header */
-            margin-bottom: 30px;
+            color: #4CAF50;
+            margin-bottom: 20px;
         }
-        .sidebar-title {
-            font-size: 22px;
+        .section-title {
+            font-size: 20px;
             font-weight: bold;
-            color: #ffffff;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            color: #F44336; /* Red color for section titles */
+        }
+        .stat-box {
             text-align: center;
-            padding: 15px 0;
-            background-color: #2ecc71; /* Green sidebar title background */
+            padding: 15px;
             border-radius: 10px;
+            margin: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            color: white;
+        }
+        .green {
+            background-color: #4CAF50;
+        }
+        .blue {
+            background-color: #2196F3;
+        }
+        .yellow {
+            background-color: #FFC107;
+        }
+        .orange {
+            background-color: #FF9800;
+        }
+        .red {
+            background-color: #F44336;
         }
         .card {
             background-color: #ffffff;
             border-radius: 10px;
             padding: 20px;
-            margin: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-        }
-        .small-card {
-            text-align: center;
-            padding: 15px;
-            font-size: 16px;
-            font-weight: bold;
-            color: #2c3e50; /* Text color */
-            border-radius: 5px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Sidebar
-st.sidebar.markdown('<div class="sidebar-title">Navigation</div>', unsafe_allow_html=True)
-st.sidebar.button("Overview")
-st.sidebar.button("Reports")
-st.sidebar.button("Settings")
-st.sidebar.button("Help")
+# Display dashboard title
+st.markdown('<div class="header">PROFESSIOAL ATTENDANCE DASHBOARD</div>', unsafe_allow_html=True)
 
-# Header
-st.markdown('<div class="header">Professional Dashboard</div>', unsafe_allow_html=True)
+# File uploader
+uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
-# Example data for visualization
-data = pd.DataFrame({
-    "Category": ["A", "B", "C", "D"],
-    "Values": [30, 20, 25, 25]
-})
+if uploaded_file:
+    # Read and process the data
+    data = pd.read_csv(uploaded_file)
+    processed_data = process_attendance_data(data)
 
-# Layout: 3 columns
-col1, col2, col3 = st.columns(3)
+    # Attendance counts by category
+    category_counts = processed_data['Attendance_Category'].value_counts()
 
-with col1:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Pie Chart")
-    fig, ax = plt.subplots()
-    ax.pie(data['Values'], labels=data['Category'], autopct="%1.1f%%", startangle=90)
+    # Overview Section
+    st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
+    st.markdown("""
+        <div style="display: flex; justify-content: space-evenly; margin-bottom: 20px;">
+            <div class="stat-box green">101–150 mins<br>{}</div>
+            <div class="stat-box blue">51–100 mins<br>{}</div>
+            <div class="stat-box yellow">11–50 mins<br>{}</div>
+            <div class="stat-box orange">1–10 mins<br>{}</div>
+            <div class="stat-box red">No Response<br>{}</div>
+        </div>
+    """.format(
+        category_counts.get('101–150 mins', 0),
+        category_counts.get('51–100 mins', 0),
+        category_counts.get('11–50 mins', 0),
+        category_counts.get('1–10 mins', 0),
+        category_counts.get('No Response', 0),
+    ), unsafe_allow_html=True)
+
+    # Pie Chart Section
+    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
+    fig, ax = plt.subplots(figsize=(6, 6))
+    colors = {
+        '101–150 mins': '#4CAF50',
+        '51–100 mins': '#2196F3',
+        '11–50 mins': '#FFC107',
+        '1–10 mins': '#FF9800',
+        'No Response': '#F44336'
+    }
+    ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
+    ax.axis('equal')
     st.pyplot(fig)
-    st.markdown('</div>', unsafe_allow_html=True)
 
-with col2:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Line Chart")
-    fig, ax = plt.subplots()
-    ax.plot(data['Category'], data['Values'], marker="o", linestyle="--", color="#1f77b4")
-    st.pyplot(fig)
-    st.markdown('</div>', unsafe_allow_html=True)
+    # Detailed Data Section
+    st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
+    with st.expander("View 101–150 mins (Qualified Students)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '101–150 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 51–100 mins (Moderately Attended)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '51–100 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 11–50 mins (Short Duration Attendance)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '11–50 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View 1–10 mins (Very Short Attendance)"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == '1–10 mins'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
+    with st.expander("View No Response"):
+        st.dataframe(processed_data[processed_data['Attendance_Category'] == 'No Response'][['Name (original name)', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Responded']])
 
-with col3:
-    st.markdown('<div class="card">', unsafe_allow_html=True)
-    st.subheader("Bar Chart")
-    fig, ax = plt.subplots()
-    ax.bar(data['Category'], data['Values'], color="#2ecc71")
-    st.pyplot(fig)
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# Summary Statistics Section
-st.markdown('<div class="card">', unsafe_allow_html=True)
-st.subheader("Summary Statistics")
-st.markdown(f"""
-    <div style="display: flex; justify-content: space-evenly;">
-        <div class="small-card" style="background-color: #f1c40f;">Total: {sum(data['Values'])}</div>
-        <div class="small-card" style="background-color: #3498db;">Max: {max(data['Values'])}</div>
-        <div class="small-card" style="background-color: #e74c3c;">Min: {min(data['Values'])}</div>
-    </div>
-""", unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
+else:
+    st.warning("Please upload a CSV file to proceed.")
