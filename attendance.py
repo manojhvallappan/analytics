@@ -19,7 +19,9 @@ def process_attendance_data(data):
 st.markdown("""
     <style>
         .main-title { text-align: center; font-size: 36px; color: #007BFF; margin-bottom: 30px; }
+        .tab-content { font-size: 18px; padding: 15px; }
         .section-title { font-size: 24px; color: #28a745; margin-top: 20px; }
+        .highlight { background-color: #f8f9fa; padding: 10px; border-radius: 5px; margin-bottom: 15px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -62,15 +64,10 @@ if uploaded_file:
     # Summary Distribution Chart
     st.markdown('<div class="section-title">Attendance Distribution</div>', unsafe_allow_html=True)
     category_counts = processed_data['Attendance_Category'].value_counts()
-
+    
     fig, ax = plt.subplots(figsize=(6, 6))
-    colors = {
-        'Full Present': '#28a745',        # Green
-        'Potentially Present': '#8a2be2', # Purple
-        'Short Attendance': '#FFD700',    # Yellow
-        'No Response': '#DC3545'          # Red
-    }
-    ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=[colors[key] for key in category_counts.index])
+    colors = ['#007BFF', '#28a745', '#FFC107', '#DC3545']
+    ax.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
     ax.axis('equal')
     st.pyplot(fig)
 
