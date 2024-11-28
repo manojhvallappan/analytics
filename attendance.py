@@ -20,11 +20,11 @@ def classify_attendance(row):
     time_minutes = parse_time_taken(row['Time taken'])
     response_length = len(row['Response 2']) if isinstance(row['Response 2'], str) else 0
 
-    if time_minutes > 20 and response_length > 10:
+    if time_minutes > 20 and response_length >= 4:
         return "Present"
-    elif 15 <= time_minutes <= 20 and response_length > 10:
+    elif 15 <= time_minutes <= 20 and response_length >= 4:
         return "Potentially Present"
-    elif time_minutes < 15 or response_length < 5:
+    elif time_minutes < 15 or response_length < 4:
         return "Absent"
     else:
         return "Absent"
