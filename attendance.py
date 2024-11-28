@@ -52,11 +52,34 @@ st.title("Zoom Attendance Analytics")
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
-    data = pd.read_csv(uploaded_file)
+    try:
+        # Try different encodings if UTF-8 fails
+        data = pd.read_csv(uploaded_file, encoding='utf-8')
+    except UnicodeDecodeError:
+        try:
+            data = pd.read_csv(uploaded_file, encoding='latin1')
+        except UnicodeDecodeError:
+            st.error("Unable to decode the file. Please ensure it is UTF-8 or Latin1 encoded.")
+            st.stop()  # Stop further execution if decoding fails
+
+    # Display a preview of the data
+    st.write("File loaded successfully!")
+    st.dataframe(data.head())
+
+    # Process the attendance data
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
+        # Display processed data
         st.write("Processed Data Preview:")
         st.dataframe(processed_data.head())  # Display a preview
+
+        # Display detailed attendance data for each category
+        st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
+        for category in ['Full Present (Above 100 mins with Feedback)', 'Full Present (Above 100 mins, Feedback < 20 words)']:
+            with st.expander(f"View {category}"):
+                filtered_data = processed_data[processed_data['Attendance_Category'] == category]
+                st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded', 'Feedback']])
+
 else:
     st.warning("Please upload a CSV file to proceed.")
