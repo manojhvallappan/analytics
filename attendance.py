@@ -17,7 +17,7 @@ def process_attendance_data(data):
     data['Attendance_Category'] = 'No Response'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (Above 100 mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Absentees (Below 70 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
 
     return data
 
@@ -33,7 +33,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="header">ZOOM ONILNE ATTEDNDANCE ANALYTICS</div>', unsafe_allow_html=True)
+st.markdown('<div class="header">ZOOM ONLINE ATTENDANCE ANALYTICS</div>', unsafe_allow_html=True)
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
@@ -47,7 +47,7 @@ if uploaded_file:
         <div style="display: flex; justify-content: space-evenly;">
             <div class="stat-box green">Full Present (Above 100 mins)<br>{category_counts.get('Full Present (Above 100 mins)', 0)}</div>
             <div class="stat-box yellow">Potentially Present (70-100 mins)<br>{category_counts.get('Potentially Present (70-100 mins)', 0)}</div>
-            <div class="stat-box orange">Absentees (Below 70 mins)<br>{category_counts.get('Absentees (Below 70 mins)', 0)}</div>
+            <div class="stat-box orange">Short Attendance (Below 70 mins)<br>{category_counts.get('Short Attendance (Below 70 mins)', 0)}</div>
             <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
         </div>
     """, unsafe_allow_html=True)
@@ -67,10 +67,16 @@ if uploaded_file:
 
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
-    for category in ['Full Present (Above 100 mins)', 'Potentially Present (70-100 mins)', 'Absentees(Below 70 mins)', 'No Response']:
+    for category in ['Full Present (Above 100 mins)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+            
+            # Check if the filtered data is empty and show message if so
+            if filtered_data.empty:
+                st.write(f"No data available for {category}.")
+            else:
+                st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
+
