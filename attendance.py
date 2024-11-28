@@ -3,33 +3,42 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def process_attendance_data(data):
+    # Rename columns if they exist in the dataset
     data.rename(columns={
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
         'Recording disclaimer response': 'Responded',
-        'Question 1': 'Q1_Response',
-        'Question 2': 'Q2_Response'
     }, inplace=True)
 
-    # Convert time columns to datetime
-    data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
-    data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
+    # Convert time columns to datetime if available
+    data['Join_Time'] = pd.to_datetime(data.get('Join_Time'), errors='coerce')
+    data['Leave_Time'] = pd.to_datetime(data.get('Leave_Time'), errors='coerce')
 
-    # Calculate duration in minutes
-    data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
+    # Calculate duration in minutes if possible
+    if 'Join_Time' in data and 'Leave_Time' in data:
+        data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
+    else:
+        data['Duration_Minutes'] = 0
 
     # Initialize attendance category
     data['Attendance_Category'] = 'No Response'
 
-    # Apply condition: Full Present if Duration > 100 mins and Q2_Response > 20 words
+    # Check for response columns
+    if 'Question 2' in data:
+        data['Q2_Response'] = data['Question 2']
+        data['Q2_Response_Length'] = data['Q2_Response'].str.split().str.len()
+    else:
+        data['Q2_Response_Length'] = 0
+
+    # Apply the condition for Full Present based on Duration and Response length
     data.loc[
         (data['Responded'] == 'OK') & 
         (data['Duration_Minutes'] > 100) & 
-        (data['Q2_Response'].str.split().str.len() > 20), 
+        (data['Q2_Response_Length'] > 20), 
         'Attendance_Category'
     ] = 'Full Present (Above 100 mins with response > 20 words)'
 
-    # Apply conditions for other attendance categories
+    # Other attendance categories
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
 
@@ -48,22 +57,15 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Header
 st.markdown('<div class="header">ZOOM ONLINE ATTENDANCE ANALYTICS</div>', unsafe_allow_html=True)
 
-# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
-    
-    # Process the uploaded data
     processed_data = process_attendance_data(data)
-    
-    # Get the count of each attendance category
     category_counts = processed_data['Attendance_Category'].value_counts()
 
-    # Attendance Overview Section
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown(f"""
         <div style="display: flex; justify-content: space-evenly;">
@@ -74,7 +76,6 @@ if uploaded_file:
         </div>
     """, unsafe_allow_html=True)
 
-    # Attendance Distribution Pie Chart
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(8, 8))
     colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
@@ -88,13 +89,12 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
-    # Detailed Attendance Data Section
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
     for category in ['Full Present (Above 100 mins with response > 20 words)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Q1_Response', 'Q2_Response', 'Responded']])
+            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Q2_Response', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
