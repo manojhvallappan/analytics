@@ -8,6 +8,7 @@ def process_attendance_data(data):
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
         'Recording disclaimer response': 'Responded',
+        'Question 2': 'Q2_Response'
     }, inplace=True)
 
     # Convert time columns to datetime if available
@@ -15,36 +16,33 @@ def process_attendance_data(data):
     data['Leave_Time'] = pd.to_datetime(data.get('Leave_Time'), errors='coerce')
 
     # Calculate duration in minutes if possible
-    if 'Join_Time' in data and 'Leave_Time' in data:
-        data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
-    else:
-        data['Duration_Minutes'] = 0
+    data['Duration_Minutes'] = (
+        (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
+    ).fillna(0)
 
     # Initialize attendance category
     data['Attendance_Category'] = 'No Response'
 
-    # Check for response columns
-    if 'Question 2' in data:
-        data['Q2_Response'] = data['Question 2']
+    if 'Q2_Response' in data:
         data['Q2_Response_Length'] = data['Q2_Response'].str.split().str.len()
     else:
         data['Q2_Response_Length'] = 0
 
-    # Apply the condition for Full Present based on Duration and Response length
+    # Apply the condition for Full Present
     data.loc[
-        (data['Responded'] == 'OK') & 
-        (data['Duration_Minutes'] > 100) & 
-        (data['Q2_Response_Length'] > 20), 
+        (data['Responded'] == 'OK') &
+        (data['Duration_Minutes'] > 100) &
+        (data['Q2_Response_Length'] > 20),
         'Attendance_Category'
     ] = 'Full Present (Above 100 mins with response > 20 words)'
 
-    # Other attendance categories
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100),
+             'Attendance_Category'] = 'Potentially Present (70-100 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70),
+             'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
 
     return data
 
-# Streamlit styling
 st.markdown("""
     <style>
         .header { text-align: center; font-size: 36px; color: #ff69b4; }
@@ -76,25 +74,19 @@ if uploaded_file:
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
-    fig, ax = plt.subplots(figsize=(8, 8))
-    colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
-    ax.pie(
-        category_counts, 
-        labels=category_counts.index, 
-        autopct='%1.1f%%', 
-        startangle=90, 
-        colors=colors
-    )
-    ax.axis('equal')
-    st.pyplot(fig)
-
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
     for category in ['Full Present (Above 100 mins with response > 20 words)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Q2_Response', 'Responded']])
+
+            # Dynamically select only available columns for display
+            available_columns = [
+                col for col in ['Name (original name)', 'Email', 'Duration_Minutes', 'Q2_Response', 'Responded']
+                if col in filtered_data.columns
+            ]
+
+            st.dataframe(filtered_data[available_columns])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
