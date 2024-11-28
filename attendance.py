@@ -3,20 +3,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def process_attendance_data(data):
-    st.write("Columns in the dataset:", data.columns.tolist())  # Debugging: Print all column names
-
-    # Rename columns for consistency, ensure these match exactly with CSV headers
+    # Rename columns for consistency
     data.rename(columns={
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
         'Recording disclaimer response': 'Responded',
         'Response 2': 'Feedback'  # Ensure exact match with the actual column name
     }, inplace=True)
-
-    # Ensure 'Feedback' column exists
-    if 'Feedback' not in data.columns:
-        st.error("Column 'Response 2' not found. Please check the CSV format.")
-        return data
 
     # Convert Join and Leave times to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
@@ -61,6 +54,11 @@ if uploaded_file:
         except UnicodeDecodeError:
             st.error("Unable to decode the file. Please ensure it is UTF-8 or Latin1 encoded.")
             st.stop()  # Stop further execution if decoding fails
+
+    # Check if the data is empty
+    if data.empty:
+        st.error("The uploaded file is empty. Please upload a valid CSV file with data.")
+        st.stop()  # Stop further execution if the file is empty
 
     # Display a preview of the data
     st.write("File loaded successfully!")
