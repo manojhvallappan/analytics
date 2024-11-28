@@ -7,6 +7,8 @@ def process_attendance_data(data):
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
         'Recording disclaimer response': 'Responded',
+        'Question 1': 'Q1_Response',
+        'Question 2': 'Q2_Response'
     }, inplace=True)
 
     # Convert time columns to datetime
@@ -19,11 +21,11 @@ def process_attendance_data(data):
     # Initialize attendance category
     data['Attendance_Category'] = 'No Response'
 
-    # Apply the condition for Full Present: Duration > 100 mins and feedback > 20 words
+    # Apply condition: Full Present if Duration > 100 mins and Q2_Response > 20 words
     data.loc[
         (data['Responded'] == 'OK') & 
         (data['Duration_Minutes'] > 100) & 
-        (data['Responded'].str.split().str.len() > 20), 
+        (data['Q2_Response'].str.split().str.len() > 20), 
         'Attendance_Category'
     ] = 'Full Present (Above 100 mins with response > 20 words)'
 
@@ -92,7 +94,7 @@ if uploaded_file:
     for category in ['Full Present (Above 100 mins with response > 20 words)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Q1_Response', 'Q2_Response', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
