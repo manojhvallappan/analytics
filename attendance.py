@@ -9,18 +9,31 @@ def process_attendance_data(data):
         'Recording disclaimer response': 'Responded',
     }, inplace=True)
 
+    # Convert time columns to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
 
+    # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
+    # Initialize attendance category
     data['Attendance_Category'] = 'No Response'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (Above 100 mins)'
+
+    # Apply the condition for Full Present: Duration > 100 mins and feedback > 20 words
+    data.loc[
+        (data['Responded'] == 'OK') & 
+        (data['Duration_Minutes'] > 100) & 
+        (data['Responded'].str.split().str.len() > 20), 
+        'Attendance_Category'
+    ] = 'Full Present (Above 100 mins with response > 20 words)'
+
+    # Apply conditions for other attendance categories
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Potentially Present (70-100 mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70), 'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
 
     return data
 
+# Streamlit styling
 st.markdown("""
     <style>
         .header { text-align: center; font-size: 36px; color: #ff69b4; }
@@ -33,25 +46,33 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# Header
 st.markdown('<div class="header">ZOOM ONLINE ATTENDANCE ANALYTICS</div>', unsafe_allow_html=True)
 
+# File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
+    
+    # Process the uploaded data
     processed_data = process_attendance_data(data)
+    
+    # Get the count of each attendance category
     category_counts = processed_data['Attendance_Category'].value_counts()
 
+    # Attendance Overview Section
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown(f"""
         <div style="display: flex; justify-content: space-evenly;">
-            <div class="stat-box green">Full Present (Above 100 mins)<br>{category_counts.get('Full Present (Above 100 mins)', 0)}</div>
+            <div class="stat-box green">Full Present (Above 100 mins with response > 20 words)<br>{category_counts.get('Full Present (Above 100 mins with response > 20 words)', 0)}</div>
             <div class="stat-box yellow">Potentially Present (70-100 mins)<br>{category_counts.get('Potentially Present (70-100 mins)', 0)}</div>
             <div class="stat-box orange">Short Attendance (Below 70 mins)<br>{category_counts.get('Short Attendance (Below 70 mins)', 0)}</div>
             <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
         </div>
     """, unsafe_allow_html=True)
 
+    # Attendance Distribution Pie Chart
     st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
     fig, ax = plt.subplots(figsize=(8, 8))
     colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
@@ -65,18 +86,13 @@ if uploaded_file:
     ax.axis('equal')
     st.pyplot(fig)
 
+    # Detailed Attendance Data Section
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
-    for category in ['Full Present (Above 100 mins)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
+    for category in ['Full Present (Above 100 mins with response > 20 words)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            
-            # Check if the filtered data is empty and show message if so
-            if filtered_data.empty:
-                st.write(f"No data available for {category}.")
-            else:
-                st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
+            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Responded']])
 
 else:
     st.warning("Please upload a CSV file to proceed.")
-
