@@ -2,40 +2,41 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Function to process attendance data
 def process_attendance_data(data):
-    # Rename columns to ensure compatibility
+    # Rename columns for uniformity
     data.rename(columns={
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
         'Recording disclaimer response': 'Responded',
-        'Question 2': 'Q2_Response'
+        'Response 2': 'Feedback'
     }, inplace=True)
 
-    # Ensure proper datetime conversion for Join_Time and Leave_Time
-    data['Join_Time'] = pd.to_datetime(data.get('Join_Time'), errors='coerce')
-    data['Leave_Time'] = pd.to_datetime(data.get('Leave_Time'), errors='coerce')
+    # Convert Join and Leave times to datetime
+    data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
+    data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
 
-    # Calculate duration in minutes, handle missing values with fillna
-    data['Duration_Minutes'] = (
-        (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
-    ).fillna(0)
+    # Calculate the total attendance duration in minutes
+    data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Check if Q2_Response exists and calculate word length
-    if 'Q2_Response' in data.columns:
-        data['Q2_Response_Length'] = data['Q2_Response'].fillna("").str.split().str.len()
-    else:
-        data['Q2_Response_Length'] = 0
+    # Count the number of words in the feedback response
+    data['Word_Count'] = data['Feedback'].apply(lambda x: len(str(x).split()))
 
-    # Default attendance category
+    # Categorize attendance based on duration and feedback
     data['Attendance_Category'] = 'No Response'
+    data.loc[
+        (data['Responded'] == 'OK') &
+        (data['Duration_Minutes'] > 100) &
+        (data['Word_Count'] > 20),
+        'Attendance_Category'
+    ] = 'Full Present (Above 100 mins with Feedback)'
 
-    # Classify attendees based on attendance duration and response length
     data.loc[
         (data['Responded'] == 'OK') & 
         (data['Duration_Minutes'] > 100) & 
-        (data['Q2_Response_Length'] > 20),
+        (data['Word_Count'] <= 20),
         'Attendance_Category'
-    ] = 'Full Present (Above 100 mins with response > 20 words)'
+    ] = 'Full Present (Above 100 mins, Feedback < 20 words)'
 
     data.loc[
         (data['Responded'] == 'OK') & 
@@ -52,6 +53,7 @@ def process_attendance_data(data):
 
     return data
 
+# Streamlit UI and app layout
 st.markdown("""
     <style>
         .header { text-align: center; font-size: 36px; color: #ff69b4; }
@@ -66,6 +68,7 @@ st.markdown("""
 
 st.markdown('<div class="header">ZOOM ONLINE ATTENDANCE ANALYTICS</div>', unsafe_allow_html=True)
 
+# File uploader for CSV files
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
@@ -76,7 +79,8 @@ if uploaded_file:
     st.markdown('<div class="section-title">ATTENDANCE OVERVIEW</div>', unsafe_allow_html=True)
     st.markdown(f"""
         <div style="display: flex; justify-content: space-evenly;">
-            <div class="stat-box green">Full Present (Above 100 mins with response > 20 words)<br>{category_counts.get('Full Present (Above 100 mins with response > 20 words)', 0)}</div>
+            <div class="stat-box green">Full Present (Above 100 mins with Feedback)<br>{category_counts.get('Full Present (Above 100 mins with Feedback)', 0)}</div>
+            <div class="stat-box green">Full Present (Above 100 mins, Feedback < 20 words)<br>{category_counts.get('Full Present (Above 100 mins, Feedback < 20 words)', 0)}</div>
             <div class="stat-box yellow">Potentially Present (70-100 mins)<br>{category_counts.get('Potentially Present (70-100 mins)', 0)}</div>
             <div class="stat-box orange">Short Attendance (Below 70 mins)<br>{category_counts.get('Short Attendance (Below 70 mins)', 0)}</div>
             <div class="stat-box red">No Response<br>{category_counts.get('No Response', 0)}</div>
@@ -97,22 +101,16 @@ if uploaded_file:
     st.pyplot(fig)
 
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
-
+    
     for category in [
-        'Full Present (Above 100 mins with response > 20 words)', 
-        'Potentially Present (70-100 mins)', 
-        'Short Attendance (Below 70 mins)', 
+        'Full Present (Above 100 mins with Feedback)',
+        'Full Present (Above 100 mins, Feedback < 20 words)',
+        'Potentially Present (70-100 mins)',
+        'Short Attendance (Below 70 mins)',
         'No Response'
     ]:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-
-            # Dynamic column selection based on existing data
-            available_columns = [
-                col for col in ['Name (original name)', 'Email', 'Duration_Minutes', 'Q2_Response', 'Responded']
-                if col in filtered_data.columns
-            ]
-            st.dataframe(filtered_data[available_columns])
-
+            st.dataframe(filtered_data[['Name (original name)', 'Email', 'Duration_Minutes', 'Feedback']])
 else:
     st.warning("Please upload a CSV file to proceed.")
