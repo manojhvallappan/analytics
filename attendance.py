@@ -4,21 +4,25 @@ import pandas as pd
 def parse_time_taken(time_str):
     """Convert time taken into minutes."""
     try:
-        parts = time_str.split()
+        time_str = time_str.lower()  # Normalize case (e.g., "min" vs "MIN")
         minutes = 0
-        if "min" in parts:
-            minutes += int(parts[0])
-        if "sec" in parts[-1]:
-            seconds = int(parts[-2])
+        if "min" in time_str:
+            minutes += int(time_str.split("min")[0].strip())
+        if "sec" in time_str:
+            seconds = int(time_str.split("sec")[0].strip().split()[-1])
             minutes += seconds / 60
         return minutes
-    except:
+    except Exception as e:
+        print(f"Error parsing time: {e}")
         return 0
 
 def classify_attendance(row):
     """Classify attendance based on criteria."""
     time_minutes = parse_time_taken(row['Time taken'])
     response_length = len(row['Response 2']) if isinstance(row['Response 2'], str) else 0
+
+    # Debugging output
+    print(f"Time: {time_minutes}, Response Length: {response_length}")
 
     if time_minutes > 20 and response_length >= 4:
         return "Present"
@@ -40,6 +44,9 @@ if uploaded_file:
     data = pd.read_csv(uploaded_file)
     st.write("Uploaded Data", data.head())
 
+    # Debugging: Check column names
+    st.write("Column names", data.columns)
+
     # Classify attendance
     data['Attendance Status'] = data.apply(classify_attendance, axis=1)
 
@@ -50,3 +57,4 @@ if uploaded_file:
     # Display detailed data
     st.write("Detailed Attendance Data")
     st.dataframe(data[['First name', 'Time taken', 'Response 2', 'Attendance Status']])
+
