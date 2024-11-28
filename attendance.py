@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 def process_attendance_data(data):
-    # Rename columns if they exist in the dataset
+    # Rename columns to ensure compatibility
     data.rename(columns={
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
@@ -11,35 +11,44 @@ def process_attendance_data(data):
         'Question 2': 'Q2_Response'
     }, inplace=True)
 
-    # Convert time columns to datetime if available
+    # Ensure proper datetime conversion for Join_Time and Leave_Time
     data['Join_Time'] = pd.to_datetime(data.get('Join_Time'), errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data.get('Leave_Time'), errors='coerce')
 
-    # Calculate duration in minutes if possible
+    # Calculate duration in minutes, handle missing values with fillna
     data['Duration_Minutes'] = (
         (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
     ).fillna(0)
 
-    # Initialize attendance category
-    data['Attendance_Category'] = 'No Response'
-
-    if 'Q2_Response' in data:
-        data['Q2_Response_Length'] = data['Q2_Response'].str.split().str.len()
+    # Check if Q2_Response exists and calculate word length
+    if 'Q2_Response' in data.columns:
+        data['Q2_Response_Length'] = data['Q2_Response'].fillna("").str.split().str.len()
     else:
         data['Q2_Response_Length'] = 0
 
-    # Apply the condition for Full Present
+    # Default attendance category
+    data['Attendance_Category'] = 'No Response'
+
+    # Classify attendees based on attendance duration and response length
     data.loc[
-        (data['Responded'] == 'OK') &
-        (data['Duration_Minutes'] > 100) &
+        (data['Responded'] == 'OK') & 
+        (data['Duration_Minutes'] > 100) & 
         (data['Q2_Response_Length'] > 20),
         'Attendance_Category'
     ] = 'Full Present (Above 100 mins with response > 20 words)'
 
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100),
-             'Attendance_Category'] = 'Potentially Present (70-100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] < 70),
-             'Attendance_Category'] = 'Short Attendance (Below 70 mins)'
+    data.loc[
+        (data['Responded'] == 'OK') & 
+        (data['Duration_Minutes'] >= 70) & 
+        (data['Duration_Minutes'] <= 100),
+        'Attendance_Category'
+    ] = 'Potentially Present (70-100 mins)'
+
+    data.loc[
+        (data['Responded'] == 'OK') & 
+        (data['Duration_Minutes'] < 70),
+        'Attendance_Category'
+    ] = 'Short Attendance (Below 70 mins)'
 
     return data
 
@@ -74,18 +83,35 @@ if uploaded_file:
         </div>
     """, unsafe_allow_html=True)
 
+    st.markdown('<div class="section-title">ATTENDANCE DISTRIBUTION</div>', unsafe_allow_html=True)
+    fig, ax = plt.subplots(figsize=(8, 8))
+    colors = ['#98FB98', '#FFD700', '#FFA07A', '#FFC0CB']
+    ax.pie(
+        category_counts, 
+        labels=category_counts.index, 
+        autopct='%1.1f%%', 
+        startangle=90, 
+        colors=colors
+    )
+    ax.axis('equal')
+    st.pyplot(fig)
+
     st.markdown('<div class="section-title">DETAILED ATTENDANCE DATA</div>', unsafe_allow_html=True)
 
-    for category in ['Full Present (Above 100 mins with response > 20 words)', 'Potentially Present (70-100 mins)', 'Short Attendance (Below 70 mins)', 'No Response']:
+    for category in [
+        'Full Present (Above 100 mins with response > 20 words)', 
+        'Potentially Present (70-100 mins)', 
+        'Short Attendance (Below 70 mins)', 
+        'No Response'
+    ]:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
 
-            # Dynamically select only available columns for display
+            # Dynamic column selection based on existing data
             available_columns = [
                 col for col in ['Name (original name)', 'Email', 'Duration_Minutes', 'Q2_Response', 'Responded']
                 if col in filtered_data.columns
             ]
-
             st.dataframe(filtered_data[available_columns])
 
 else:
