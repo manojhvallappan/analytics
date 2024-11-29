@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Data
+# Sample data
 data = {
     "Name": [
         "Shelia Smith", "Violeta Smith", "Michelle Orlando", "Melissa Lamont", "Kristin Hagan", 
@@ -43,7 +43,16 @@ data = {
 # Convert data to DataFrame
 df = pd.DataFrame(data)
 
-# Function to categorize attendance
+# Clean column names
+df.columns = df.columns.str.strip()
+
+# Convert 'Duration (mins)' to numeric and handle missing values
+df['Duration (mins)'] = pd.to_numeric(df['Duration (mins)'], errors='coerce')
+
+# Fill missing values in 'Feedback' to avoid length issues
+df['Feedback'] = df['Feedback'].fillna("")
+
+# Categorize attendance
 def categorize_attendance(row):
     feedback_length = len(row['Feedback']) > 5
     if row['Duration (mins)'] > 100 and row['Disclaimer Response'] == "OK" and feedback_length:
@@ -58,10 +67,10 @@ def categorize_attendance(row):
 # Apply categorization
 df['Attendance Status'] = df.apply(categorize_attendance, axis=1)
 
-# Dashboard
+# Streamlit app
 st.title("Attendance Dashboard")
 
-# Summary
+# Summary of attendance
 st.header("Summary")
 status_counts = df['Attendance Status'].value_counts()
 st.write(status_counts)
@@ -75,6 +84,6 @@ ax.set_xlabel("Status")
 ax.set_ylabel("Number of Students")
 st.pyplot(fig)
 
-# Data Display
+# Display detailed data
 st.header("Detailed Data")
 st.write(df)
