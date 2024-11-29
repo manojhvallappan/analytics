@@ -71,7 +71,6 @@ if uploaded_file:
         with st.expander(f"View {category}"):
             filtered_data = processed_data[processed_data['Attendance_Category'] == category]
             
-            # Check if the filtered data is empty and show message if so
             if filtered_data.empty:
                 st.write(f"No data available for {category}.")
             else:
