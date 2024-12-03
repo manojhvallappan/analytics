@@ -29,30 +29,44 @@ def process_attendance_data(data):
 st.markdown("""
     <style>
         .attendance-summary {
-            background-color: #f2f2f2;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-evenly;
+            flex-wrap: wrap;
         }
-        .attendance-summary h2 {
-            color: #333;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .summary-item {
-            font-size: 18px;
-            margin: 5px 0;
+        .summary-box {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px;
+            text-align: center;
+            width: 200px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .full-present {
-            color: #32CD32;
-            font-weight: bold;
+            background-color: #32CD32;
+            color: white;
         }
         .partially-present {
-            color: #FFD700;
-            font-weight: bold;
+            background-color: #FFD700;
+            color: white;
         }
         .absent {
-            color: #FF4500;
+            background-color: #FF4500;
+            color: white;
+        }
+        .total-students {
+            background-color: #4682B4;
+            color: white;
+        }
+        .summary-box h3 {
+            margin-bottom: 10px;
+            font-size: 20px;
+        }
+        .summary-box p {
+            font-size: 18px;
             font-weight: bold;
         }
     </style>
@@ -68,8 +82,7 @@ if uploaded_file:
 
     if not processed_data.empty:
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
-        st.markdown('<h2>Attendance Summary</h2>', unsafe_allow_html=True)
-
+        
         # Calculate the total number of students
         total_students = len(processed_data)
 
@@ -78,12 +91,24 @@ if uploaded_file:
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Display total attendance counts in a colorful and professional manner
+        # Display the attendance summary in colorful boxes
         st.markdown(f"""
-            <div class="summary-item full-present">- **Total Number of Students**: {total_students}</div>
-            <div class="summary-item full-present">- **Students Attended More than 100 mins**: {full_present_count}</div>
-            <div class="summary-item partially-present">- **Students Attended Between 70-100 mins**: {partially_present_count}</div>
-            <div class="summary-item absent">- **Students Attended Below 70 mins**: {absent_count}</div>
+            <div class="summary-box total-students">
+                <h3>Total Students</h3>
+                <p>{total_students}</p>
+            </div>
+            <div class="summary-box full-present">
+                <h3>Full Present (100+ mins)</h3>
+                <p>{full_present_count}</p>
+            </div>
+            <div class="summary-box partially-present">
+                <h3>Partially Present (70-100 mins)</h3>
+                <p>{partially_present_count}</p>
+            </div>
+            <div class="summary-box absent">
+                <h3>Absent</h3>
+                <p>{absent_count}</p>
+            </div>
         """, unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
