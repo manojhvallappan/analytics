@@ -19,9 +19,9 @@ def process_attendance_data(data):
 
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    data['Attendance_Category'] = 'Absent'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (100+ mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Partially Present (70-100 mins)'
+    data['Attendance_Category'] = 'ABSENT'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'PRESENT'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'PARTIALLY PRESENT'
 
     return data
 
@@ -109,7 +109,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Attendance Dashboard with Insights")
+st.title("ZOOM LOG ANALYTICS DASHBOARD")
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
@@ -123,9 +123,9 @@ if uploaded_file:
 
         # Calculate attendance category counts
         total_students = len(processed_data)
-        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
-        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
-        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
+        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PRESENT'])
+        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
+        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'ABSENT'])
         students_without_feedback = len(processed_data[processed_data['Feedback'] == '-'])
 
         # Summary Boxes
@@ -135,13 +135,13 @@ if uploaded_file:
                 <strong>Total Students:</strong> {total_students}
             </div>
             <div class="summary-item-box full-present">
-                <strong>Full Present (100+ mins):</strong> {full_present_count}
+                <strong>PRESENT:</strong> {full_present_count}
             </div>
             <div class="summary-item-box partially-present">
-                <strong>Partially Present (70-100 mins):</strong> {partially_present_count}
+                <strong>PARTIALLY PRESENT:</strong> {partially_present_count}
             </div>
             <div class="summary-item-box absent">
-                <strong>Absent:</strong> {absent_count}
+                <strong>ABSENT:</strong> {absent_count}
             </div>
             <div class="summary-item-box" style="background-color: gray; color: white;">
                 <strong>Students Without Feedback:</strong> {students_without_feedback}
@@ -164,19 +164,19 @@ if uploaded_file:
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
-        with st.expander("Full Present (100+ mins)", expanded=True):
-            full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
+        with st.expander("PRESENT)", expanded=True):
+            full_present_data = processed_data[processed_data['Attendance_Category'] == 'PRESENT']
             st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        with st.expander("Partially Present (70-100 mins)", expanded=True):
-            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
+        with st.expander("PARTIALLY PRESENT", expanded=True):
+            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT']
             st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        with st.expander("Absent", expanded=True):
-            absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
+        with st.expander("ABSENT", expanded=True):
+            absent_data = processed_data[processed_data['Attendance_Category'] == 'ABSENT']
             st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        with st.expander("Students Without Feedback", expanded=True):
+        with st.expander("STUDENTS WITHOUT FEEDBACK", expanded=True):
             no_feedback_data = processed_data[processed_data['Feedback'] == '-']
             st.dataframe(no_feedback_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
