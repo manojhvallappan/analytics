@@ -26,7 +26,6 @@ def process_attendance_data(data):
     data['Attendance_Category'] = 'Absent'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (101+ mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 71) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Partially Present (71-100 mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 50) & (data['Duration_Minutes'] <= 100) & data['Feedback'].isna(), 'Attendance_Category'] = 'Attended (50-100 mins) but no Feedback'
 
     return data
 
@@ -58,10 +57,6 @@ st.markdown("""
         }
         .partially-present {
             background-color: #FFD700;
-            color: white;
-        }
-        .attended-no-feedback {
-            background-color: #FF6347;
             color: white;
         }
         .absent {
@@ -112,7 +107,6 @@ if uploaded_file:
         total_students = len(processed_data)
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (101+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (71-100 mins)'])
-        attended_no_feedback_count = len(processed_data[processed_data['Attendance_Category'] == 'Attended (50-100 mins) but no Feedback'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
         # Update progress bar
@@ -122,7 +116,7 @@ if uploaded_file:
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
 
         # Columns for summary
-        col1, col2, col3, col4, col5 = st.columns(5)
+        col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown(f"""
                 <div class="attendance-summary-item total-students">
@@ -146,13 +140,6 @@ if uploaded_file:
             """, unsafe_allow_html=True)
         with col4:
             st.markdown(f"""
-                <div class="attendance-summary-item attended-no-feedback">
-                    <h3>Attended (50-100 mins) but no Feedback</h3>
-                    <p>{attended_no_feedback_count}</p>
-                </div>
-            """, unsafe_allow_html=True)
-        with col5:
-            st.markdown(f"""
                 <div class="attendance-summary-item absent">
                     <h3>Absent</h3>
                     <p>{absent_count}</p>
@@ -165,7 +152,7 @@ if uploaded_file:
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
         fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF6347', '#FF4500'])
+        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF4500'])
         ax1.axis('equal')
         st.pyplot(fig1)
 
@@ -181,11 +168,6 @@ if uploaded_file:
         with st.expander("Partially Present (71-100 mins)"):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (71-100 mins)']
             st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
-
-        # Attended without Feedback
-        with st.expander("Attended (50-100 mins) but no Feedback"):
-            attended_no_feedback_data = processed_data[processed_data['Attendance_Category'] == 'Attended (50-100 mins) but no Feedback']
-            st.dataframe(attended_no_feedback_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         # Absent
         with st.expander("Absent"):
