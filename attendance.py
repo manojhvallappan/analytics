@@ -8,7 +8,10 @@ def process_attendance_data(data):
         'Leave time': 'Leave_Time',
         'Name (original name)': 'Name',
         'Recording disclaimer response': 'Responded',
-        'Feedback': 'Feedback'
+        'Feedback': 'Feedback',
+        'Times of Login': 'Login_Count',
+        'Times of Logout': 'Logout_Count',
+        'Rating': 'Rating'
     }, inplace=True)
 
     # Convert join and leave times to datetime
@@ -27,7 +30,7 @@ def process_attendance_data(data):
     return data
 
 # Streamlit dashboard setup
-st.title("Attendance Dashboard with Feedback")
+st.title("Enhanced Attendance Dashboard with Feedback, Logins, and Rating")
 
 # File uploader
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -46,7 +49,8 @@ if uploaded_file:
             if filtered_data.empty:
                 st.write(f"No students found in the {category} category.")
             else:
-                st.dataframe(filtered_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Feedback']])
+                st.dataframe(filtered_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 
+                                           'Login_Count', 'Logout_Count', 'Rating', 'Feedback']])
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
