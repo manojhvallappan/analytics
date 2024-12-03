@@ -159,15 +159,15 @@ if uploaded_file:
 
         with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
-            st.dataframe(full_present_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(full_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         with st.expander("Partially Present (70-100 mins)", expanded=True):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
-            st.dataframe(partially_present_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(partially_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         with st.expander("Absent", expanded=True):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
-            st.dataframe(absent_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(absent_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
