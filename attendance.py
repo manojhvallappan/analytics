@@ -29,40 +29,41 @@ def process_attendance_data(data):
 st.markdown("""
     <style>
         .attendance-summary {
-            background-color: #f2f2f2;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
-            gap: 15px;
+            gap: 20px;
+            padding: 20px 0;
         }
         .summary-item-box {
             background-color: #ffffff;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            width: 23%;  /* Adjust width as necessary */
+            width: 23%;
             text-align: center;
+            font-weight: bold;
         }
         .full-present {
-            color: #32CD32;
-            font-weight: bold;
+            background-color: #98FB98;
+            color: #006400;
         }
         .partially-present {
-            color: #FFD700;
-            font-weight: bold;
+            background-color: #FFD700;
+            color: #8B8000;
         }
         .absent {
-            color: #FF4500;
-            font-weight: bold;
+            background-color: #FF6347;
+            color: #8B0000;
+        }
+        .total-students {
+            background-color: #87CEFA;
+            color: #00008B;
         }
         .attendance-summary h2 {
-            color: #333;
-            font-size: 24px;
-            font-weight: bold;
             width: 100%;
             text-align: center;
+            font-size: 24px;
+            font-weight: bold;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -90,7 +91,7 @@ if uploaded_file:
 
         # Display attendance summary in individual styled boxes horizontally
         st.markdown(f"""
-            <div class="summary-item-box full-present">
+            <div class="summary-item-box total-students">
                 <strong>Total Students:</strong> {total_students}
             </div>
             <div class="summary-item-box full-present">
@@ -110,7 +111,7 @@ if uploaded_file:
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
         fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF4500'])
+        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF6347'])
         ax1.axis('equal')
         st.pyplot(fig1)
 
