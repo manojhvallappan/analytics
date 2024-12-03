@@ -138,13 +138,13 @@ if uploaded_file:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Attendance Pie Chart with matching colors
+        # Attendance Pie Chart with updated colors
         st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
         st.markdown("### ATTENDANCE DISTRIBUTION", unsafe_allow_html=True)
         category_counts = processed_data['Attendance_Category'].value_counts()
         
-        # Define colors matching the attendance summary
-        colors = ['#2ecc71', '#f39c12', '#e74c3c']  # Full Present, Partially Present, Absent
+        # Define colors: Absent (Red), Full Present (Green), Partially Present (Orange)
+        colors = ['#e74c3c', '#2ecc71', '#f39c12']  # Absent, Full Present, Partially Present
         
         fig1, ax1 = plt.subplots()
         ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
