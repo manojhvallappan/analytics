@@ -22,7 +22,6 @@ def process_attendance_data(data):
     data['Attendance_Category'] = 'Absent'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (100+ mins)'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Partially Present (70-100 mins)'
-    data.loc[(data['Responded'] != 'OK') | (data['Duration_Minutes'].isna()), 'Attendance_Category'] = 'No Response'
 
     return data
 
@@ -37,6 +36,10 @@ if uploaded_file:
     if not processed_data.empty:
         st.subheader("Attendance Summary")
 
+        # Convert Login_Count and Rating to numeric, handle errors
+        processed_data['Login_Count'] = pd.to_numeric(processed_data['Login_Count'], errors='coerce').fillna(0)
+        processed_data['Rating'] = pd.to_numeric(processed_data['Rating'], errors='coerce').fillna(0)
+
         # Attendance Pie Chart
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
@@ -44,16 +47,6 @@ if uploaded_file:
         ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF4500'])
         ax1.axis('equal')
         st.pyplot(fig1)
-
-        # Detailed Category View
-        for category in ['Full Present (100+ mins)', 'Partially Present (70-100 mins)', 'No Response']:
-            st.markdown(f"### {category} (Total: {category_counts.get(category, 0)})")
-            filtered_data = processed_data[processed_data['Attendance_Category'] == category]
-            if filtered_data.empty:
-                st.write(f"No students found in the {category} category.")
-            else:
-                st.dataframe(filtered_data[['Name', 'Email', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 
-                                           'Login_Count', 'Logout_Count', 'Rating', 'Feedback']])
 
         # Bar Graph: Logins vs. Rating
         st.markdown("### Login Counts and Ratings Bar Chart")
@@ -69,8 +62,9 @@ if uploaded_file:
 
         fig2.tight_layout()
         st.pyplot(fig2)
-
+        
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
     st.info("Please upload a CSV file to view the attendance data.")
+
