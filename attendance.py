@@ -157,17 +157,27 @@ if uploaded_file:
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
+        # Filter students with no feedback (empty or NaN feedback)
+        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | (processed_data['Feedback'] == '')]
+
+        # Expander for Full Present (100+ mins)
         with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
             st.dataframe(full_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
+        # Expander for Partially Present (70-100 mins)
         with st.expander("Partially Present (70-100 mins)", expanded=True):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
             st.dataframe(partially_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
+        # Expander for Absent
         with st.expander("Absent", expanded=True):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
             st.dataframe(absent_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+
+        # Section for students with no feedback
+        st.markdown("### STUDENTS WITHOUT FEEDBACK", unsafe_allow_html=True)
+        st.dataframe(students_no_feedback[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
