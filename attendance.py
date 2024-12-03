@@ -101,7 +101,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Attendance Dashboard with Insights")
+st.title("ZOOM LOG ANALYTICS DASHBOARD")
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
