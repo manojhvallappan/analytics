@@ -92,8 +92,9 @@ st.markdown("""
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 30px;
         }
-        .attendance-distribution h3, .detailed-attendance-data h3 {
-            color: #2c3e50;
+        /* Sky blue color for titles */
+        .attendance-distribution h3, .detailed-attendance-data h3, .attendance-summary h2 {
+            color: #87CEEB;  /* Sky blue color */
             font-size: 24px;
             font-weight: bold;
         }
