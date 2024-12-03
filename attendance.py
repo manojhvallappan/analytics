@@ -25,51 +25,69 @@ def process_attendance_data(data):
 
     return data
 
-# Apply custom CSS styling
+# Custom CSS styling for a modern, professional look
 st.markdown("""
     <style>
+        body {
+            background-color: #f4f4f4;
+            font-family: 'Arial', sans-serif;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 36px;
+            font-weight: bold;
+            margin-top: 30px;
+        }
         .attendance-summary {
             display: flex;
-            justify-content: space-evenly;
-            align-items: center;
-            gap: 20px;
-            padding: 20px 0;
+            justify-content: space-between;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 30px;
         }
         .summary-item-box {
             background-color: #ffffff;
-            padding: 15px;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             width: 23%;
             text-align: center;
             font-weight: bold;
+            font-size: 18px;
         }
         .full-present {
-            background-color: #98FB98;
-            color: #006400;
+            background-color: #2ecc71;
+            color: #ffffff;
         }
         .partially-present {
-            background-color: #FFD700;
-            color: #8B8000;
+            background-color: #f39c12;
+            color: #ffffff;
         }
         .absent {
-            background-color: #FF6347;
-            color: #8B0000;
+            background-color: #e74c3c;
+            color: #ffffff;
         }
         .total-students {
-            background-color: #87CEFA;
-            color: #00008B;
+            background-color: #3498db;
+            color: #ffffff;
         }
-        .attendance-summary h2 {
-            width: 100%;
-            text-align: center;
-            font-size: 24px;
+        .expander-header {
+            font-size: 20px;
             font-weight: bold;
+            color: #2c3e50;
+        }
+        .data-table {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 10px;
+            background-color: #ffffff;
+            margin-top: 20px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-st.title("Enhanced Attendance Dashboard with Feedback")
+st.title("Attendance Dashboard with Insights")
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
@@ -78,18 +96,16 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        # Attendance Summary Header
+        # Display attendance summary
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
 
-        # Calculate the total number of students
+        # Calculate attendance category counts
         total_students = len(processed_data)
-
-        # Calculate the number of students for each category
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Display attendance summary in individual styled boxes horizontally
+        # Summary Boxes
         st.markdown(f"""
             <div class="summary-item-box total-students">
                 <strong>Total Students:</strong> {total_students}
@@ -107,33 +123,30 @@ if uploaded_file:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Attendance Pie Chart
+        # Pie Chart for Attendance Distribution
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
         fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#98FB98', '#FFD700', '#FF6347'])
-        ax1.axis('equal')
+        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#2ecc71', '#f39c12', '#e74c3c'])
+        ax1.axis('equal')  # Equal aspect ratio ensures pie chart is circular
         st.pyplot(fig1)
 
-        # Display filtered data for each category
+        # Display detailed data for each category with expandable sections
         st.markdown("### Detailed Attendance Data")
-        
-        # Full Present
-        with st.expander("Full Present (100+ mins)"):
+
+        with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
-            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
+            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        # Partially Present
-        with st.expander("Partially Present (70-100 mins)"):
+        with st.expander("Partially Present (70-100 mins)", expanded=True):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
-            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
+            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        # Absent
-        with st.expander("Absent"):
+        with st.expander("Absent", expanded=True):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
-            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
+            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
     st.info("Please upload a CSV file to view the attendance data.")
-
