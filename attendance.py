@@ -157,8 +157,10 @@ if uploaded_file:
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
-        # Filter students with no feedback (empty or NaN feedback)
-        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | (processed_data['Feedback'].str.strip() == '')]
+        # Filter students with no feedback (empty, NaN feedback, or '-')
+        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | 
+                                              (processed_data['Feedback'].str.strip() == '') |
+                                              (processed_data['Feedback'] == '-')]
 
         # Expander for Full Present (100+ mins)
         with st.expander("Full Present (100+ mins)", expanded=True):
