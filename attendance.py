@@ -1,9 +1,9 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
 
 def process_attendance_data(data):
-    # Rename columns
     data.rename(columns={
         'Join time': 'Join_Time',
         'Leave time': 'Leave_Time',
@@ -15,21 +15,18 @@ def process_attendance_data(data):
         'Rating': 'Rating'
     }, inplace=True)
 
-    # Convert time columns to datetime
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
     data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
 
-    # Calculate duration in minutes
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Define attendance categories
     data['Attendance_Category'] = 'Absent'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (101+ mins)'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 71) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Partially Present (71-100 mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'Full Present (100+ mins)'
+    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'Partially Present (70-100 mins)'
 
     return data
 
-# Apply custom CSS styling for a more professional layout
+# Apply custom CSS styling for better layout and appearance
 st.markdown("""
     <style>
         .attendance-summary {
@@ -89,10 +86,10 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# Progress bar
+# Add a progress bar for better interaction
 progress_bar = st.progress(0)
 
-# Upload CSV file
+# Upload the file
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
@@ -103,19 +100,18 @@ if uploaded_file:
     progress_bar.progress(50)
 
     if not processed_data.empty:
-        # Calculate total counts
+        # Attendance summary section with colorful boxes
         total_students = len(processed_data)
-        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (101+ mins)'])
-        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (71-100 mins)'])
+        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
+        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
         # Update progress bar
         progress_bar.progress(100)
 
-        # Attendance summary in colorful boxes
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
 
-        # Columns for summary
+        # Display each attendance category in separate boxes
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             st.markdown(f"""
@@ -127,14 +123,14 @@ if uploaded_file:
         with col2:
             st.markdown(f"""
                 <div class="attendance-summary-item full-present">
-                    <h3>Full Present (101+ mins)</h3>
+                    <h3>Full Present (100+ mins)</h3>
                     <p>{full_present_count}</p>
                 </div>
             """, unsafe_allow_html=True)
         with col3:
             st.markdown(f"""
                 <div class="attendance-summary-item partially-present">
-                    <h3>Partially Present (71-100 mins)</h3>
+                    <h3>Partially Present (70-100 mins)</h3>
                     <p>{partially_present_count}</p>
                 </div>
             """, unsafe_allow_html=True)
@@ -156,17 +152,17 @@ if uploaded_file:
         ax1.axis('equal')
         st.pyplot(fig1)
 
-        # Detailed Data
+        # Detailed Attendance Data
         st.markdown("### Detailed Attendance Data")
 
         # Full Present
-        with st.expander("Full Present (101+ mins)", expanded=True):
-            full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (101+ mins)']
+        with st.expander("Full Present (100+ mins)", expanded=True):
+            full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
             st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         # Partially Present
-        with st.expander("Partially Present (71-100 mins)"):
-            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (71-100 mins)']
+        with st.expander("Partially Present (70-100 mins)"):
+            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
             st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         # Absent
