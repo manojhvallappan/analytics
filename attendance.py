@@ -33,8 +33,7 @@ st.markdown("""
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: space-evenly;
-            flex-wrap: wrap;
+            justify-content: space-between;
         }
         .summary-box {
             background-color: #f9f9f9;
@@ -42,7 +41,7 @@ st.markdown("""
             border-radius: 8px;
             margin: 10px;
             text-align: center;
-            width: 200px;
+            width: 22%;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .full-present {
@@ -81,30 +80,40 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
-        
-        # Calculate the total number of students
+        # Attendance summary section in row-wise layout
         total_students = len(processed_data)
-
-        # Calculate the number of students for each category
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Display the attendance summary in colorful boxes
+        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
+
+        # Total Students
         st.markdown(f"""
             <div class="summary-box total-students">
                 <h3>Total Students</h3>
                 <p>{total_students}</p>
             </div>
+        """, unsafe_allow_html=True)
+
+        # Full Present (100+ mins)
+        st.markdown(f"""
             <div class="summary-box full-present">
                 <h3>Full Present (100+ mins)</h3>
                 <p>{full_present_count}</p>
             </div>
+        """, unsafe_allow_html=True)
+
+        # Partially Present (70-100 mins)
+        st.markdown(f"""
             <div class="summary-box partially-present">
                 <h3>Partially Present (70-100 mins)</h3>
                 <p>{partially_present_count}</p>
             </div>
+        """, unsafe_allow_html=True)
+
+        # Absent
+        st.markdown(f"""
             <div class="summary-box absent">
                 <h3>Absent</h3>
                 <p>{absent_count}</p>
