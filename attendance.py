@@ -136,3 +136,4 @@ if uploaded_file:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
     st.info("Please upload a CSV file to view the attendance data.")
+
