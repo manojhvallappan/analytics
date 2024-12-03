@@ -30,7 +30,12 @@ uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
     try:
-        data = pd.read_csv(uploaded_file)
+        # Attempt to read the CSV file with different encodings
+        try:
+            data = pd.read_csv(uploaded_file, encoding='utf-8')
+        except UnicodeDecodeError:
+            data = pd.read_csv(uploaded_file, encoding='latin1')
+
         processed_data = process_attendance_data(data)
 
         if not processed_data.empty:
