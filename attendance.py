@@ -109,7 +109,7 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        # Display attendance summary
+        # Display attendance summary with the title "Attendance Summary"
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
 
         # Calculate attendance category counts
@@ -119,6 +119,7 @@ if uploaded_file:
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
         # Summary Boxes
+        st.markdown("<h2>Attendance Summary</h2>", unsafe_allow_html=True)  # Add the summary title here
         st.markdown(f"""
             <div class="summary-item-box total-students">
                 <strong>Total Students:</strong> {total_students}
