@@ -84,6 +84,19 @@ st.markdown("""
             background-color: #ffffff;
             margin-top: 20px;
         }
+        /* Sky blue background for Attendance Distribution and Detailed Data */
+        .attendance-distribution, .detailed-attendance-data {
+            background-color: #87CEEB;  /* Sky blue color */
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+        }
+        .attendance-distribution h3, .detailed-attendance-data h3 {
+            color: #2c3e50;
+            font-size: 24px;
+            font-weight: bold;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -123,16 +136,19 @@ if uploaded_file:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Pie Chart for Attendance Distribution
-        st.markdown("### Attendance Distribution")
+        # Attendance Pie Chart
+        st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
+        st.markdown("### Attendance Distribution", unsafe_allow_html=True)
         category_counts = processed_data['Attendance_Category'].value_counts()
         fig1, ax1 = plt.subplots()
         ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#2ecc71', '#f39c12', '#e74c3c'])
         ax1.axis('equal')  # Equal aspect ratio ensures pie chart is circular
         st.pyplot(fig1)
+        st.markdown('</div>', unsafe_allow_html=True)
 
         # Display detailed data for each category with expandable sections
-        st.markdown("### Detailed Attendance Data")
+        st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
+        st.markdown("### Detailed Attendance Data", unsafe_allow_html=True)
 
         with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
@@ -145,6 +161,8 @@ if uploaded_file:
         with st.expander("Absent", expanded=True):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
             st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
