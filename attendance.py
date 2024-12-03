@@ -29,11 +29,10 @@ def process_attendance_data(data):
 st.markdown("""
     <style>
         .attendance-summary {
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             display: flex;
-            justify-content: space-between;
+            justify-content: space-around;
+            padding: 20px;
+            margin-bottom: 30px;
         }
         .summary-box {
             background-color: #f9f9f9;
@@ -80,47 +79,46 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        # Attendance summary section in row-wise layout
+        # Attendance summary section in column-wise layout
         total_students = len(processed_data)
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
+        # Create columns for each summary
+        col1, col2, col3, col4 = st.columns(4)
 
-        # Total Students
-        st.markdown(f"""
-            <div class="summary-box total-students">
-                <h3>Total Students</h3>
-                <p>{total_students}</p>
-            </div>
-        """, unsafe_allow_html=True)
+        with col1:
+            st.markdown(f"""
+                <div class="summary-box total-students">
+                    <h3>Total Students</h3>
+                    <p>{total_students}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-        # Full Present (100+ mins)
-        st.markdown(f"""
-            <div class="summary-box full-present">
-                <h3>Full Present (100+ mins)</h3>
-                <p>{full_present_count}</p>
-            </div>
-        """, unsafe_allow_html=True)
+        with col2:
+            st.markdown(f"""
+                <div class="summary-box full-present">
+                    <h3>Full Present (100+ mins)</h3>
+                    <p>{full_present_count}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-        # Partially Present (70-100 mins)
-        st.markdown(f"""
-            <div class="summary-box partially-present">
-                <h3>Partially Present (70-100 mins)</h3>
-                <p>{partially_present_count}</p>
-            </div>
-        """, unsafe_allow_html=True)
+        with col3:
+            st.markdown(f"""
+                <div class="summary-box partially-present">
+                    <h3>Partially Present (70-100 mins)</h3>
+                    <p>{partially_present_count}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
-        # Absent
-        st.markdown(f"""
-            <div class="summary-box absent">
-                <h3>Absent</h3>
-                <p>{absent_count}</p>
-            </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown('</div>', unsafe_allow_html=True)
+        with col4:
+            st.markdown(f"""
+                <div class="summary-box absent">
+                    <h3>Absent</h3>
+                    <p>{absent_count}</p>
+                </div>
+            """, unsafe_allow_html=True)
 
         # Attendance Pie Chart
         st.markdown("### Attendance Distribution")
