@@ -30,7 +30,8 @@ st.markdown("""
     <style>
         .attendance-summary {
             display: flex;
-            justify-content: space-between;
+            justify-content: space-evenly;
+            align-items: center;
             gap: 20px;
             padding: 20px 0;
         }
@@ -79,7 +80,6 @@ if uploaded_file:
     if not processed_data.empty:
         # Attendance Summary Header
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
-        st.markdown('<h2>Attendance Summary</h2>', unsafe_allow_html=True)
 
         # Calculate the total number of students
         total_students = len(processed_data)
