@@ -73,6 +73,10 @@ st.markdown("""
             background-color: #3498db;
             color: #ffffff;
         }
+        .no-feedback {
+            background-color: #bdc3c7;  /* Gray color for no feedback */
+            color: #ffffff;
+        }
         .expander-header {
             font-size: 20px;
             font-weight: bold;
@@ -142,7 +146,7 @@ if uploaded_file:
             <div class="summary-item-box absent">
                 <strong>Absent:</strong> {absent_count}
             </div>
-            <div class="summary-item-box">
+            <div class="summary-item-box no-feedback">
                 <strong>Students Without Feedback:</strong> {no_feedback_count}
             </div>
         """, unsafe_allow_html=True)
