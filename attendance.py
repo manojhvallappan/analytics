@@ -33,13 +33,17 @@ st.markdown("""
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            flex-wrap: wrap;
         }
         .summary-item-box {
             background-color: #ffffff;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin: 10px;
+            width: 23%;
             text-align: center;
         }
         .full-present {
@@ -83,7 +87,7 @@ if uploaded_file:
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Display attendance summary in individual styled boxes
+        # Display attendance summary in individual styled boxes horizontally
         st.markdown(f"""
             <div class="summary-item-box full-present">
                 <strong>Total Number of Students:</strong> {total_students}
