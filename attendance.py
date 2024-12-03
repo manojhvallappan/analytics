@@ -11,8 +11,7 @@ def process_attendance_data(data):
         'Feedback': 'Feedback',
         'Times of Login': 'Login_Count',
         'Times of Logout': 'Logout_Count',
-        'Rating': 'Rating',
-        'Email': 'Email'  # Assuming 'Email' column is present in the CSV
+        'Rating': 'Rating'
     }, inplace=True)
 
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
@@ -26,7 +25,7 @@ def process_attendance_data(data):
 
     return data
 
-# Custom CSS styling for a modern, professional look
+# Custom CSS for responsive UI
 st.markdown("""
     <style>
         body {
@@ -73,10 +72,6 @@ st.markdown("""
             background-color: #3498db;
             color: #ffffff;
         }
-        .no-feedback {
-            background-color: #bdc3c7;  /* Gray color for no feedback */
-            color: #ffffff;
-        }
         .expander-header {
             font-size: 20px;
             font-weight: bold;
@@ -89,19 +84,27 @@ st.markdown("""
             background-color: #ffffff;
             margin-top: 20px;
         }
-        /* Sky blue background for Attendance Distribution and Detailed Data */
         .attendance-distribution, .detailed-attendance-data {
-            background-color: #87CEEB;  /* Sky blue color */
+            background-color: #87CEEB; 
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             margin-top: 30px;
         }
-        /* Sky blue color for titles */
         .attendance-distribution h3, .detailed-attendance-data h3, .attendance-summary h2 {
-            color: #87CEEB;  /* Sky blue color */
+            color: #87CEEB; 
             font-size: 24px;
             font-weight: bold;
+        }
+        @media screen and (max-width: 768px) {
+            .attendance-summary {
+                flex-direction: column;
+                align-items: center;
+            }
+            .summary-item-box {
+                width: 100%;
+                margin-bottom: 10px;
+            }
         }
     </style>
 """, unsafe_allow_html=True)
@@ -123,13 +126,7 @@ if uploaded_file:
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
-
-        # Filter students with no feedback (empty, NaN feedback, or '-')
-        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | 
-                                              (processed_data['Feedback'].str.strip() == '') |
-                                              (processed_data['Feedback'] == '-')]
-
-        no_feedback_count = len(students_no_feedback)
+        students_without_feedback = len(processed_data[processed_data['Feedback'] == '-'])
 
         # Summary Boxes
         st.markdown("<h2>ATTENDANCE SUMMARY</h2>", unsafe_allow_html=True)  # Add the summary title here
@@ -146,23 +143,19 @@ if uploaded_file:
             <div class="summary-item-box absent">
                 <strong>Absent:</strong> {absent_count}
             </div>
-            <div class="summary-item-box no-feedback">
-                <strong>Students Without Feedback:</strong> {no_feedback_count}
+            <div class="summary-item-box" style="background-color: gray; color: white;">
+                <strong>Students Without Feedback:</strong> {students_without_feedback}
             </div>
         """, unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Attendance Pie Chart with updated colors
+        # Attendance Pie Chart
         st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
         st.markdown("### ATTENDANCE DISTRIBUTION", unsafe_allow_html=True)
         category_counts = processed_data['Attendance_Category'].value_counts()
-        
-        # Define colors: Absent (Red), Full Present (Green), Partially Present (Orange)
-        colors = ['#e74c3c', '#2ecc71', '#f39c12']  # Absent, Full Present, Partially Present
-        
         fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
+        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#2ecc71', '#f39c12', '#e74c3c'])
         ax1.axis('equal')  # Equal aspect ratio ensures pie chart is circular
         st.pyplot(fig1)
         st.markdown('</div>', unsafe_allow_html=True)
@@ -171,27 +164,21 @@ if uploaded_file:
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
-        # Expander for Full Present (100+ mins)
         with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
-            st.dataframe(full_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        # Expander for Partially Present (70-100 mins)
         with st.expander("Partially Present (70-100 mins)", expanded=True):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
-            st.dataframe(partially_present_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        # Expander for Absent
         with st.expander("Absent", expanded=True):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
-            st.dataframe(absent_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        # Section for students with no feedback
-        if not students_no_feedback.empty:
-            st.markdown("### STUDENTS WITHOUT FEEDBACK", unsafe_allow_html=True)
-            st.dataframe(students_no_feedback[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
-        else:
-            st.markdown("No students found without feedback.", unsafe_allow_html=True)
+        with st.expander("Students Without Feedback", expanded=True):
+            no_feedback_data = processed_data[processed_data['Feedback'] == '-']
+            st.dataframe(no_feedback_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
