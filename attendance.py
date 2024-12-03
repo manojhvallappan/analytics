@@ -120,7 +120,7 @@ if uploaded_file:
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
         # Summary Boxes
-        st.markdown("<h2>Attendance Summary</h2>", unsafe_allow_html=True)  # Add the summary title here
+        st.markdown("<h2>ATTENDANCE SUMMARY</h2>", unsafe_allow_html=True)  # Add the summary title here
         st.markdown(f"""
             <div class="summary-item-box total-students">
                 <strong>Total Students:</strong> {total_students}
@@ -140,7 +140,7 @@ if uploaded_file:
 
         # Attendance Pie Chart
         st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
-        st.markdown("### Attendance Distribution", unsafe_allow_html=True)
+        st.markdown("### ATTENDANCE DISTRIBUTION", unsafe_allow_html=True)
         category_counts = processed_data['Attendance_Category'].value_counts()
         fig1, ax1 = plt.subplots()
         ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#2ecc71', '#f39c12', '#e74c3c'])
@@ -150,7 +150,7 @@ if uploaded_file:
 
         # Display detailed data for each category with expandable sections
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
-        st.markdown("### Detailed Attendance Data", unsafe_allow_html=True)
+        st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
         with st.expander("Full Present (100+ mins)", expanded=True):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
