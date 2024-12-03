@@ -25,6 +25,39 @@ def process_attendance_data(data):
 
     return data
 
+# Apply custom CSS styling
+st.markdown("""
+    <style>
+        .attendance-summary {
+            background-color: #f2f2f2;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .attendance-summary h2 {
+            color: #333;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .summary-item {
+            font-size: 18px;
+            margin: 5px 0;
+        }
+        .full-present {
+            color: #32CD32;
+            font-weight: bold;
+        }
+        .partially-present {
+            color: #FFD700;
+            font-weight: bold;
+        }
+        .absent {
+            color: #FF4500;
+            font-weight: bold;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.title("Enhanced Attendance Dashboard with Feedback")
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
@@ -34,7 +67,8 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        st.subheader("Attendance Summary")
+        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
+        st.markdown('<h2>Attendance Summary</h2>', unsafe_allow_html=True)
 
         # Calculate the total number of students
         total_students = len(processed_data)
@@ -44,13 +78,15 @@ if uploaded_file:
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Display total attendance counts
+        # Display total attendance counts in a colorful and professional manner
         st.markdown(f"""
-            - **Total Number of Students**: {total_students}
-            - **Students Attended More than 100 mins**: {full_present_count}
-            - **Students Attended Between 70-100 mins**: {partially_present_count}
-            - **Students Attended Below 70 mins**: {absent_count}
-        """)
+            <div class="summary-item full-present">- **Total Number of Students**: {total_students}</div>
+            <div class="summary-item full-present">- **Students Attended More than 100 mins**: {full_present_count}</div>
+            <div class="summary-item partially-present">- **Students Attended Between 70-100 mins**: {partially_present_count}</div>
+            <div class="summary-item absent">- **Students Attended Below 70 mins**: {absent_count}</div>
+        """, unsafe_allow_html=True)
+
+        st.markdown('</div>', unsafe_allow_html=True)
 
         # Attendance Pie Chart
         st.markdown("### Attendance Distribution")
