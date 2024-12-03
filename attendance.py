@@ -115,9 +115,9 @@ if uploaded_file:
 
         # Calculate attendance category counts
         total_students = len(processed_data)
-        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
-        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
-        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
+        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PRESENT'])
+        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
+        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'ABSENT'])
 
         # Summary Boxes
         st.markdown("<h2>ATTENDANCE SUMMARY</h2>", unsafe_allow_html=True)  # Add the summary title here
@@ -126,13 +126,13 @@ if uploaded_file:
                 <strong>Total Students:</strong> {total_students}
             </div>
             <div class="summary-item-box full-present">
-                <strong>Full Present (100+ mins):</strong> {full_present_count}
+                <strong>PRESENT:</strong> {full_present_count}
             </div>
             <div class="summary-item-box partially-present">
-                <strong>Partially Present (70-100 mins):</strong> {partially_present_count}
+                <strong>PARTIALLY PRESENT:</strong> {partially_present_count}
             </div>
             <div class="summary-item-box absent">
-                <strong>Absent:</strong> {absent_count}
+                <strong>ABSENT:</strong> {absent_count}
             </div>
         """, unsafe_allow_html=True)
 
@@ -156,16 +156,16 @@ if uploaded_file:
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
-        with st.expander("Full Present (100+ mins)", expanded=True):
-            full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
+        with st.expander("PRESENT", expanded=True):
+            full_present_data = processed_data[processed_data['Attendance_Category'] == 'PRESENT']
             st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        with st.expander("Partially Present (70-100 mins)", expanded=True):
-            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
+        with st.expander("PARTIALLY PRESENT", expanded=True):
+            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT']
             st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
-        with st.expander("Absent", expanded=True):
-            absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
+        with st.expander("ABSENT", expanded=True):
+            absent_data = processed_data[processed_data['Attendance_Category'] == 'ABSENT']
             st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
