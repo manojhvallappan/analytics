@@ -34,14 +34,13 @@ st.markdown("""
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-        .attendance-summary h2 {
-            color: #333;
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .summary-item {
-            font-size: 18px;
-            margin: 5px 0;
+        .summary-item-box {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            text-align: center;
         }
         .full-present {
             color: #32CD32;
@@ -53,6 +52,11 @@ st.markdown("""
         }
         .absent {
             color: #FF4500;
+            font-weight: bold;
+        }
+        .attendance-summary h2 {
+            color: #333;
+            font-size: 24px;
             font-weight: bold;
         }
     </style>
@@ -79,17 +83,21 @@ if uploaded_file:
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Create columns for the summary display
-        col1, col2, col3, col4 = st.columns(4)
-
-        with col1:
-            st.markdown(f"<div class='summary-item full-present'>**Total Number of Students**: {total_students}</div>", unsafe_allow_html=True)
-        with col2:
-            st.markdown(f"<div class='summary-item full-present'>**Students Attended More than 100 mins**: {full_present_count}</div>", unsafe_allow_html=True)
-        with col3:
-            st.markdown(f"<div class='summary-item partially-present'>**Students Attended Between 70-100 mins**: {partially_present_count}</div>", unsafe_allow_html=True)
-        with col4:
-            st.markdown(f"<div class='summary-item absent'>**Students Attended Below 70 mins**: {absent_count}</div>", unsafe_allow_html=True)
+        # Display attendance summary in individual styled boxes
+        st.markdown(f"""
+            <div class="summary-item-box full-present">
+                <strong>Total Number of Students:</strong> {total_students}
+            </div>
+            <div class="summary-item-box full-present">
+                <strong>Students Attended More than 100 mins:</strong> {full_present_count}
+            </div>
+            <div class="summary-item-box partially-present">
+                <strong>Students Attended Between 70-100 mins:</strong> {partially_present_count}
+            </div>
+            <div class="summary-item-box absent">
+                <strong>Students Attended Below 70 mins:</strong> {absent_count}
+            </div>
+        """, unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
