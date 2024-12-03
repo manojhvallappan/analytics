@@ -120,6 +120,13 @@ if uploaded_file:
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
+        # Filter students with no feedback (empty, NaN feedback, or '-')
+        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | 
+                                              (processed_data['Feedback'].str.strip() == '') |
+                                              (processed_data['Feedback'] == '-')]
+
+        no_feedback_count = len(students_no_feedback)
+
         # Summary Boxes
         st.markdown("<h2>ATTENDANCE SUMMARY</h2>", unsafe_allow_html=True)  # Add the summary title here
         st.markdown(f"""
@@ -134,6 +141,9 @@ if uploaded_file:
             </div>
             <div class="summary-item-box absent">
                 <strong>Absent:</strong> {absent_count}
+            </div>
+            <div class="summary-item-box">
+                <strong>Students Without Feedback:</strong> {no_feedback_count}
             </div>
         """, unsafe_allow_html=True)
 
@@ -156,11 +166,6 @@ if uploaded_file:
         # Display detailed data for each category with expandable sections
         st.markdown('<div class="detailed-attendance-data">', unsafe_allow_html=True)
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
-
-        # Filter students with no feedback (empty, NaN feedback, or '-')
-        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | 
-                                              (processed_data['Feedback'].str.strip() == '') |
-                                              (processed_data['Feedback'] == '-')]
 
         # Expander for Full Present (100+ mins)
         with st.expander("Full Present (100+ mins)", expanded=True):
