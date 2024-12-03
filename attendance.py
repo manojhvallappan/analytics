@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import seaborn as sns
 
 def process_attendance_data(data):
     data.rename(columns={
@@ -26,121 +25,71 @@ def process_attendance_data(data):
 
     return data
 
-# Apply custom CSS styling for better layout and appearance
+# Apply custom CSS styling
 st.markdown("""
     <style>
         .attendance-summary {
-            display: flex;
-            justify-content: space-between;
-            background-color: #f0f8ff;
+            background-color: #f2f2f2;
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            margin-bottom: 30px;
         }
-        .attendance-summary-item {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 8px;
-            width: 22%;
-            text-align: center;
-            font-size: 16px;
+        .attendance-summary h2 {
+            color: #333;
+            font-size: 24px;
             font-weight: bold;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .summary-item {
+            font-size: 18px;
+            margin: 5px 0;
         }
         .full-present {
-            background-color: #32CD32;
-            color: white;
+            color: #32CD32;
+            font-weight: bold;
         }
         .partially-present {
-            background-color: #FFD700;
-            color: white;
+            color: #FFD700;
+            font-weight: bold;
         }
         .absent {
-            background-color: #FF4500;
-            color: white;
-        }
-        .total-students {
-            background-color: #4682B4;
-            color: white;
-        }
-        .expander-title {
-            font-size: 20px;
+            color: #FF4500;
             font-weight: bold;
-            color: #333;
-        }
-        .expander-subtitle {
-            color: #555;
-        }
-        .streamlit-table thead th {
-            background-color: #f5f5f5;
-            color: #333;
-            font-weight: bold;
-        }
-        .streamlit-table tbody tr:hover {
-            background-color: #f0f8ff;
-        }
-        .progress-bar {
-            margin-top: 20px;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Add a progress bar for better interaction
-progress_bar = st.progress(0)
+st.title("Enhanced Attendance Dashboard with Feedback")
 
-# Upload the file
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
-    
-    # Update progress bar
-    progress_bar.progress(50)
 
     if not processed_data.empty:
-        # Attendance summary section with colorful boxes
+        # Attendance Summary Header
+        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
+        st.markdown('<h2>Attendance Summary</h2>', unsafe_allow_html=True)
+
+        # Calculate the total number of students
         total_students = len(processed_data)
+
+        # Calculate the number of students for each category
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
 
-        # Update progress bar
-        progress_bar.progress(100)
-
-        st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
-
-        # Display each attendance category in separate boxes
+        # Create columns for the summary display
         col1, col2, col3, col4 = st.columns(4)
+
         with col1:
-            st.markdown(f"""
-                <div class="attendance-summary-item total-students">
-                    <h3>Total Students</h3>
-                    <p>{total_students}</p>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='summary-item full-present'>**Total Number of Students**: {total_students}</div>", unsafe_allow_html=True)
         with col2:
-            st.markdown(f"""
-                <div class="attendance-summary-item full-present">
-                    <h3>Full Present (100+ mins)</h3>
-                    <p>{full_present_count}</p>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='summary-item full-present'>**Students Attended More than 100 mins**: {full_present_count}</div>", unsafe_allow_html=True)
         with col3:
-            st.markdown(f"""
-                <div class="attendance-summary-item partially-present">
-                    <h3>Partially Present (70-100 mins)</h3>
-                    <p>{partially_present_count}</p>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='summary-item partially-present'>**Students Attended Between 70-100 mins**: {partially_present_count}</div>", unsafe_allow_html=True)
         with col4:
-            st.markdown(f"""
-                <div class="attendance-summary-item absent">
-                    <h3>Absent</h3>
-                    <p>{absent_count}</p>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f"<div class='summary-item absent'>**Students Attended Below 70 mins**: {absent_count}</div>", unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
@@ -152,24 +101,23 @@ if uploaded_file:
         ax1.axis('equal')
         st.pyplot(fig1)
 
-        # Detailed Attendance Data
+        # Display filtered data for each category
         st.markdown("### Detailed Attendance Data")
-
+        
         # Full Present
-        with st.expander("Full Present (100+ mins)", expanded=True):
+        with st.expander("Full Present (100+ mins)"):
             full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
-            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
 
         # Partially Present
         with st.expander("Partially Present (70-100 mins)"):
             partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
-            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
 
         # Absent
         with st.expander("Absent"):
             absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
-            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
-
+            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
