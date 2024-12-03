@@ -25,7 +25,7 @@ def process_attendance_data(data):
 
     return data
 
-st.title("Enhanced Attendance Dashboard with Feedback, Logins, and Rating")
+st.title("Enhanced Attendance Dashboard with Feedback")
 
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
@@ -36,10 +36,6 @@ if uploaded_file:
     if not processed_data.empty:
         st.subheader("Attendance Summary")
 
-        # Convert Login_Count and Rating to numeric, handle errors
-        processed_data['Login_Count'] = pd.to_numeric(processed_data['Login_Count'], errors='coerce').fillna(0)
-        processed_data['Rating'] = pd.to_numeric(processed_data['Rating'], errors='coerce').fillna(0)
-
         # Attendance Pie Chart
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
@@ -48,23 +44,24 @@ if uploaded_file:
         ax1.axis('equal')
         st.pyplot(fig1)
 
-        # Bar Graph: Logins vs. Rating
-        st.markdown("### Login Counts and Ratings Bar Chart")
-        fig2, ax2 = plt.subplots()
-        processed_data_grouped = processed_data.groupby('Name').agg({'Login_Count': 'sum', 'Rating': 'mean'}).reset_index()
-        ax2.bar(processed_data_grouped['Name'], processed_data_grouped['Login_Count'], color='skyblue', label='Logins')
-        ax2.set_xlabel('Name')
-        ax2.set_ylabel('Number of Logins', color='blue')
-
-        ax3 = ax2.twinx()
-        ax3.plot(processed_data_grouped['Name'], processed_data_grouped['Rating'], color='orange', marker='o', label='Rating')
-        ax3.set_ylabel('Rating', color='orange')
-
-        fig2.tight_layout()
-        st.pyplot(fig2)
+        # Display filtered data for each category
+        st.markdown("### Detailed Attendance Data")
         
+        # Full Present
+        with st.expander("Full Present (100+ mins)"):
+            full_present_data = processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)']
+            st.dataframe(full_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
+
+        # Partially Present
+        with st.expander("Partially Present (70-100 mins)"):
+            partially_present_data = processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)']
+            st.dataframe(partially_present_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
+
+        # Absent
+        with st.expander("Absent"):
+            absent_data = processed_data[processed_data['Attendance_Category'] == 'Absent']
+            st.dataframe(absent_data[['Name', 'Join_Time', 'Leave_Time', 'Feedback']])
     else:
         st.warning("Processed data is empty. Please check the uploaded file.")
 else:
     st.info("Please upload a CSV file to view the attendance data.")
-
