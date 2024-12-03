@@ -30,7 +30,7 @@ st.markdown("""
     <style>
         .attendance-summary {
             display: flex;
-            justify-content: space-around;
+            justify-content: space-between;
             padding: 20px;
             margin-bottom: 30px;
         }
@@ -79,7 +79,7 @@ if uploaded_file:
     processed_data = process_attendance_data(data)
 
     if not processed_data.empty:
-        # Attendance summary section in column-wise layout
+        # Attendance summary section in a single line with colored boxes
         total_students = len(processed_data)
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
