@@ -138,12 +138,16 @@ if uploaded_file:
 
         st.markdown('</div>', unsafe_allow_html=True)
 
-        # Attendance Pie Chart
+        # Attendance Pie Chart with matching colors
         st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
         st.markdown("### ATTENDANCE DISTRIBUTION", unsafe_allow_html=True)
         category_counts = processed_data['Attendance_Category'].value_counts()
+        
+        # Define colors matching the attendance summary
+        colors = ['#2ecc71', '#f39c12', '#e74c3c']  # Full Present, Partially Present, Absent
+        
         fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#2ecc71', '#f39c12', '#e74c3c'])
+        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=colors)
         ax1.axis('equal')  # Equal aspect ratio ensures pie chart is circular
         st.pyplot(fig1)
         st.markdown('</div>', unsafe_allow_html=True)
