@@ -36,6 +36,22 @@ if uploaded_file:
     if not processed_data.empty:
         st.subheader("Attendance Summary")
 
+        # Calculate the total number of students
+        total_students = len(processed_data)
+
+        # Calculate the number of students for each category
+        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Full Present (100+ mins)'])
+        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'Partially Present (70-100 mins)'])
+        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'Absent'])
+
+        # Display total attendance counts
+        st.markdown(f"""
+            - **Total Number of Students**: {total_students}
+            - **Students Attended More than 100 mins**: {full_present_count}
+            - **Students Attended Between 70-100 mins**: {partially_present_count}
+            - **Students Attended Below 70 mins**: {absent_count}
+        """)
+
         # Attendance Pie Chart
         st.markdown("### Attendance Distribution")
         category_counts = processed_data['Attendance_Category'].value_counts()
