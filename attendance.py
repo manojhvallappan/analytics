@@ -158,7 +158,7 @@ if uploaded_file:
         st.markdown("### DETAILED ATTENDANCE DATA", unsafe_allow_html=True)
 
         # Filter students with no feedback (empty or NaN feedback)
-        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | (processed_data['Feedback'] == '')]
+        students_no_feedback = processed_data[processed_data['Feedback'].isnull() | (processed_data['Feedback'].str.strip() == '')]
 
         # Expander for Full Present (100+ mins)
         with st.expander("Full Present (100+ mins)", expanded=True):
@@ -176,8 +176,11 @@ if uploaded_file:
             st.dataframe(absent_data[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
 
         # Section for students with no feedback
-        st.markdown("### STUDENTS WITHOUT FEEDBACK", unsafe_allow_html=True)
-        st.dataframe(students_no_feedback[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+        if not students_no_feedback.empty:
+            st.markdown("### STUDENTS WITHOUT FEEDBACK", unsafe_allow_html=True)
+            st.dataframe(students_no_feedback[['Name', 'Email', 'Login_Count', 'Logout_Count', 'Join_Time', 'Leave_Time', 'Feedback']], use_container_width=True)
+        else:
+            st.markdown("No students found without feedback.", unsafe_allow_html=True)
 
         st.markdown('</div>', unsafe_allow_html=True)
 
