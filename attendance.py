@@ -25,7 +25,6 @@ def process_attendance_data(data):
 
     return data
 
-# Custom CSS for responsive UI
 st.markdown("""
     <style>
         body { background-color: #f4f4f4; font-family: 'Arial', sans-serif; }
