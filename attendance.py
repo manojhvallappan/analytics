@@ -60,13 +60,12 @@ if uploaded_file:
 
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
         st.markdown(f"""
-    <div class="summary-box"><div><strong>TOTAL STUDENTS</strong></div><div class="summary-value">{total_students}</div></div>
-    <div class="summary-box"><div><strong>PRESENT</strong></div><div class="summary-value">{full_present_count}</div></div>
-    <div class="summary-box"><div><strong>PARTIALLY PRESENT</strong></div><div class="summary-value">{partially_present_count}</div></div>
-    <div class="summary-box"><div><strong>ABSENT</strong></div><div class="summary-value">{absent_count}</div></div>
-    <div class="summary-box" style="background-color: gray; color: white;"><div><strong>STUDENTS WITHOUT FEEDBACK</strong></div><div class="summary-value">{students_without_feedback}</div></div>
-""", unsafe_allow_html=True)
-
+            <div class="summary-item-box total-students"><strong>Total Students:</strong> {total_students}</div>
+            <div class="summary-item-box full-present"><strong>PRESENT:</strong> {full_present_count}</div>
+            <div class="summary-item-box partially-present"><strong>PARTIALLY PRESENT:</strong> {partially_present_count}</div>
+            <div class="summary-item-box absent"><strong>ABSENT:</strong> {absent_count}</div>
+            <div class="summary-item-box" style="background-color: gray; color: white;"><strong>Students Without Feedback:</strong> {students_without_feedback}</div>
+        """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
         st.markdown('<div class="attendance-distribution">', unsafe_allow_html=True)
