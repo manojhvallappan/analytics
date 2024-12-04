@@ -2,145 +2,127 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
-# Function to process attendance data
-def process_attendance_data(data):
-    data.rename(columns={
-        'Join time': 'Join_Time',
-        'Leave time': 'Leave_Time',
-        'Name (original name)': 'Name',
-        'Recording disclaimer response': 'Responded',
-        'Feedback': 'Feedback',
-        'Times of Login': 'Login_Count',
-        'Times of Logout': 'Logout_Count',
-        'Rating': 'Rating'
-    }, inplace=True)
-
-    data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
-    data['Leave_Time'] = pd.to_datetime(data['Leave_Time'], errors='coerce')
-
-    data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
-
-    data['Attendance_Category'] = 'ABSENT'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'PRESENT'
-    data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'PARTIALLY PRESENT'
-
-    return data
-
-# Custom CSS for dashboard design
+# Custom CSS for a dashboard-like interface
 st.markdown("""
     <style>
         body {
+            background-color: #f4f4f4;
             font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
         }
-        .main-container {
-            display: flex;
-            flex-direction: column;
+        .container {
+            width: 90%;
+            margin: auto;
+        }
+        .header {
+            text-align: center;
+            color: #2c3e50;
+            font-size: 36px;
+            font-weight: bold;
             padding: 20px;
         }
-        .title {
-            text-align: center;
-            font-size: 32px;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        .summary-row {
+        .summary-section {
             display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
+            justify-content: space-around;
+            padding: 20px;
         }
         .summary-box {
-            background-color: #ffffff;
+            background-color: white;
+            padding: 20px;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            padding: 20px;
+            width: 20%;
             text-align: center;
-            width: 18%;
         }
         .summary-value {
-            font-size: 24px;
+            font-size: 36px;
             font-weight: bold;
-            margin-top: 10px;
         }
-        .chart-container, .detailed-data {
+        .chart-section {
+            display: flex;
+            justify-content: space-around;
             margin-top: 20px;
+        }
+        .chart-box {
+            background-color: white;
             padding: 20px;
-            background-color: #ffffff;
             border-radius: 10px;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 45%;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Main Title
-st.markdown('<div class="title">ZOOM LOG ANALYTICS DASHBOARD</div>', unsafe_allow_html=True)
+st.markdown('<div class="container">', unsafe_allow_html=True)
+st.markdown('<div class="header">ZOOM LOG ANALYTICS DASHBOARD</div>', unsafe_allow_html=True)
 
-# File uploader
-uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
+# Example data (replace with your actual data)
+total_students = 381
+full_present_count = 86
+partially_present_count = 11
+absent_count = 284
+students_without_feedback = 188
 
-if uploaded_file:
-    data = pd.read_csv(uploaded_file)
-    processed_data = process_attendance_data(data)
+# Attendance Summary Section
+st.markdown('<div class="summary-section">', unsafe_allow_html=True)
+st.markdown(f"""
+    <div class="summary-box">
+        <div><strong>TOTAL STUDENTS</strong></div>
+        <div class="summary-value">{total_students}</div>
+    </div>
+    <div class="summary-box" style="background-color: #2ecc71; color: white;">
+        <div><strong>PRESENT</strong></div>
+        <div class="summary-value">{full_present_count}</div>
+    </div>
+    <div class="summary-box" style="background-color: #f39c12; color: white;">
+        <div><strong>PARTIALLY PRESENT</strong></div>
+        <div class="summary-value">{partially_present_count}</div>
+    </div>
+    <div class="summary-box" style="background-color: #e74c3c; color: white;">
+        <div><strong>ABSENT</strong></div>
+        <div class="summary-value">{absent_count}</div>
+    </div>
+    <div class="summary-box" style="background-color: gray; color: white;">
+        <div><strong>STUDENTS WITHOUT FEEDBACK</strong></div>
+        <div class="summary-value">{students_without_feedback}</div>
+    </div>
+""", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-    if not processed_data.empty:
-        # Summary Section
-        st.markdown('<div class="summary-row">', unsafe_allow_html=True)
-        
-        total_students = len(processed_data)
-        full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PRESENT'])
-        partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
-        absent_count = len(processed_data[processed_data['Attendance_Category'] == 'ABSENT'])
-        students_without_feedback = len(processed_data[processed_data['Feedback'] == '-'])
+# Example Data for Pie Chart
+data = {
+    'Category': ['PRESENT', 'PARTIALLY PRESENT', 'ABSENT'],
+    'Count': [full_present_count, partially_present_count, absent_count]
+}
+df = pd.DataFrame(data)
 
-        st.markdown(f"""
-            <div class="summary-box">
-                <div>TOTAL STUDENTS</div>
-                <div class="summary-value">{total_students}</div>
-            </div>
-            <div class="summary-box" style="background-color: #2ecc71; color: white;">
-                <div>PRESENT</div>
-                <div class="summary-value">{full_present_count}</div>
-            </div>
-            <div class="summary-box" style="background-color: #f39c12; color: white;">
-                <div>PARTIALLY PRESENT</div>
-                <div class="summary-value">{partially_present_count}</div>
-            </div>
-            <div class="summary-box" style="background-color: #e74c3c; color: white;">
-                <div>ABSENT</div>
-                <div class="summary-value">{absent_count}</div>
-            </div>
-            <div class="summary-box" style="background-color: gray; color: white;">
-                <div>STUDENTS WITHOUT FEEDBACK</div>
-                <div class="summary-value">{students_without_feedback}</div>
-            </div>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+# Pie Chart Section
+st.markdown('<div class="chart-section">', unsafe_allow_html=True)
+st.markdown('<div class="chart-box">', unsafe_allow_html=True)
+st.markdown('<h3>Attendance Distribution</h3>', unsafe_allow_html=True)
 
-        # Attendance Pie Chart
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
-        st.markdown("<h3>Attendance Distribution</h3>", unsafe_allow_html=True)
-        category_counts = processed_data['Attendance_Category'].value_counts()
-        fig1, ax1 = plt.subplots()
-        ax1.pie(category_counts, labels=category_counts.index, autopct='%1.1f%%', startangle=90, colors=['#e74c3c', '#2ecc71', '#f39c12'])
-        ax1.axis('equal')
-        st.pyplot(fig1)
-        st.markdown('</div>', unsafe_allow_html=True)
+fig, ax = plt.subplots()
+ax.pie(df['Count'], labels=df['Category'], autopct='%1.1f%%', colors=['#2ecc71', '#f39c12', '#e74c3c'], startangle=90)
+ax.axis('equal')  # Equal aspect ratio ensures that the pie chart is circular.
+st.pyplot(fig)
 
-        # Detailed Data Section
-        st.markdown('<div class="detailed-data">', unsafe_allow_html=True)
-        st.markdown("<h3>Detailed Attendance Data</h3>", unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
-        with st.expander("PRESENT"):
-            st.dataframe(processed_data[processed_data['Attendance_Category'] == 'PRESENT'][['Name', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Feedback']])
-        with st.expander("PARTIALLY PRESENT"):
-            st.dataframe(processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT'][['Name', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Feedback']])
-        with st.expander("ABSENT"):
-            st.dataframe(processed_data[processed_data['Attendance_Category'] == 'ABSENT'][['Name', 'Join_Time', 'Leave_Time', 'Duration_Minutes', 'Feedback']])
-        with st.expander("STUDENTS WITHOUT FEEDBACK"):
-            st.dataframe(processed_data[processed_data['Feedback'] == '-'][['Name', 'Join_Time', 'Leave_Time', 'Duration_Minutes']])
+# Bar Chart Section
+st.markdown('<div class="chart-box">', unsafe_allow_html=True)
+st.markdown('<h3>Feedback Summary</h3>', unsafe_allow_html=True)
 
-        st.markdown('</div>', unsafe_allow_html=True)
-    else:
-        st.warning("Processed data is empty. Please check the uploaded file.")
-else:
-    st.info("Please upload a CSV file to view the attendance data.")
+bar_data = {
+    'Feedback Status': ['Provided', 'Not Provided'],
+    'Count': [total_students - students_without_feedback, students_without_feedback]
+}
+bar_df = pd.DataFrame(bar_data)
+
+fig, ax = plt.subplots()
+ax.bar(bar_df['Feedback Status'], bar_df['Count'], color=['#3498db', 'gray'])
+ax.set_ylabel('Number of Students')
+ax.set_title('Feedback Status')
+st.pyplot(fig)
+
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
