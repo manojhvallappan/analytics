@@ -35,40 +35,31 @@ if uploaded_file:
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
 
-    # Show data range for debugging
     st.markdown("### Date Range of Uploaded Data")
-    st.write(f"**Earliest Date:** {processed_data['Join_Time'].min()}")
-    st.write(f"**Latest Date:** {processed_data['Join_Time'].max()}")
+    min_date = processed_data['Join_Time'].min()
+    max_date = processed_data['Join_Time'].max()
+    st.write(f"**Earliest Date:** {min_date}")
+    st.write(f"**Latest Date:** {max_date}")
+
+    st.write("### Sample Data:")
+    st.write(processed_data[['Name', 'Join_Time', 'Leave_Time']].head(5))
 
     # Date filtering
     st.sidebar.header("Filter by Date")
-    start_date = st.sidebar.date_input("Start Date", processed_data['Join_Time'].min().date())
-    end_date = st.sidebar.date_input("End Date", processed_data['Join_Time'].max().date())
+    start_date = st.sidebar.date_input("Start Date", min_date.date() if min_date else None)
+    end_date = st.sidebar.date_input("End Date", max_date.date() if max_date else None)
 
     # Filtered data
-    filtered_data = processed_data[(processed_data['Join_Time'] >= pd.Timestamp(start_date)) & 
-                                   (processed_data['Join_Time'] <= pd.Timestamp(end_date))]
+    if min_date and max_date:
+        filtered_data = processed_data[(processed_data['Join_Time'] >= pd.Timestamp(start_date)) & 
+                                       (processed_data['Join_Time'] <= pd.Timestamp(end_date))]
 
-    if not filtered_data.empty:
-        total_students = len(filtered_data)
-        full_present_count = len(filtered_data[filtered_data['Attendance_Category'] == 'PRESENT'])
-        partially_present_count = len(filtered_data[filtered_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
-        absent_count = len(filtered_data[filtered_data['Attendance_Category'] == 'ABSENT'])
-        avg_duration = filtered_data['Duration (minutes)'].mean()
-
-        st.markdown(f"**Total Students:** {total_students}")
-        st.markdown(f"**Present:** {full_present_count}")
-        st.markdown(f"**Partially Present:** {partially_present_count}")
-        st.markdown(f"**Absent:** {absent_count}")
-        st.markdown(f"**Average Duration:** {avg_duration:.2f} minutes")
-
-        # Downloadable CSV
-        csv = filtered_data.to_csv(index=False)
-        st.download_button(label="Download CSV Report", data=csv, file_name="attendance_report.csv", mime="text/csv")
-
-        # Detailed data
-        st.dataframe(filtered_data[['Name', 'Join_Time', 'Leave_Time', 'Duration (minutes)', 'Login_Count', 'Logout_Count', 'Feedback']])
+        if not filtered_data.empty:
+            st.markdown(f"**Total Records for Selected Date Range:** {len(filtered_data)}")
+            st.dataframe(filtered_data[['Name', 'Join_Time', 'Leave_Time', 'Duration (minutes)', 'Attendance_Category']])
+        else:
+            st.warning("No data available for the selected date range.")
     else:
-        st.warning("No data available for the selected date range.")
+        st.warning("No valid dates available in the uploaded file.")
 else:
     st.info("Please upload a CSV file to view the attendance data.")
