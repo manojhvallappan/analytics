@@ -31,16 +31,21 @@ st.title("ZOOM LOG ANALYTICS DASHBOARD")
 # File Upload
 uploaded_file = st.file_uploader("Upload Attendance CSV", type=["csv"])
 
-# If the file is uploaded
 if uploaded_file:
     data = pd.read_csv(uploaded_file)
     processed_data = process_attendance_data(data)
-    
-    # Filter by Date
+
+    # Show data range for debugging
+    st.markdown("### Date Range of Uploaded Data")
+    st.write(f"**Earliest Date:** {processed_data['Join_Time'].min()}")
+    st.write(f"**Latest Date:** {processed_data['Join_Time'].max()}")
+
+    # Date filtering
     st.sidebar.header("Filter by Date")
-    start_date = st.sidebar.date_input("Start Date", processed_data['Join_Time'].min())
-    end_date = st.sidebar.date_input("End Date", processed_data['Join_Time'].max())
-    
+    start_date = st.sidebar.date_input("Start Date", processed_data['Join_Time'].min().date())
+    end_date = st.sidebar.date_input("End Date", processed_data['Join_Time'].max().date())
+
+    # Filtered data
     filtered_data = processed_data[(processed_data['Join_Time'] >= pd.Timestamp(start_date)) & 
                                    (processed_data['Join_Time'] <= pd.Timestamp(end_date))]
 
@@ -49,24 +54,19 @@ if uploaded_file:
         full_present_count = len(filtered_data[filtered_data['Attendance_Category'] == 'PRESENT'])
         partially_present_count = len(filtered_data[filtered_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
         absent_count = len(filtered_data[filtered_data['Attendance_Category'] == 'ABSENT'])
-        average_duration = filtered_data['Duration (minutes)'].mean()
+        avg_duration = filtered_data['Duration (minutes)'].mean()
 
         st.markdown(f"**Total Students:** {total_students}")
         st.markdown(f"**Present:** {full_present_count}")
         st.markdown(f"**Partially Present:** {partially_present_count}")
         st.markdown(f"**Absent:** {absent_count}")
-        st.markdown(f"**Average Attendance Duration:** {average_duration:.2f} minutes")
+        st.markdown(f"**Average Duration:** {avg_duration:.2f} minutes")
 
-        # Bar chart for Attendance Trends
-        attendance_trend = filtered_data.groupby(filtered_data['Join_Time'].dt.date)['Name'].count()
-        st.bar_chart(attendance_trend)
-
-        # Download Button
+        # Downloadable CSV
         csv = filtered_data.to_csv(index=False)
-        st.download_button(label="Download Attendance Report", data=csv, file_name="attendance_report.csv", mime="text/csv")
+        st.download_button(label="Download CSV Report", data=csv, file_name="attendance_report.csv", mime="text/csv")
 
-        # Detailed Attendance Data
-        st.markdown("### Detailed Attendance Data")
+        # Detailed data
         st.dataframe(filtered_data[['Name', 'Join_Time', 'Leave_Time', 'Duration (minutes)', 'Login_Count', 'Logout_Count', 'Feedback']])
     else:
         st.warning("No data available for the selected date range.")
