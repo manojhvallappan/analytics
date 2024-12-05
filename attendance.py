@@ -54,7 +54,9 @@ if uploaded_file:
         full_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PRESENT'])
         partially_present_count = len(processed_data[processed_data['Attendance_Category'] == 'PARTIALLY PRESENT'])
         absent_count = len(processed_data[processed_data['Attendance_Category'] == 'ABSENT'])
-        students_without_feedback = len(processed_data[processed_data['Feedback'].isna()])
+        
+        # Modified the condition to check for NaN, empty strings, or "-"
+        students_without_feedback = len(processed_data[processed_data['Feedback'].isna() | (processed_data['Feedback'] == "") | (processed_data['Feedback'] == "-")])
 
         st.markdown('<div class="attendance-summary">', unsafe_allow_html=True)
         st.markdown(f"""
@@ -77,7 +79,7 @@ if uploaded_file:
         # Detailed data with expandable sections
         for category, label in [("PRESENT", "PRESENT"), ("PARTIALLY PRESENT", "PARTIALLY PRESENT"), ("ABSENT", "ABSENT"), ("-", "STUDENTS WITHOUT FEEDBACK")]:
             with st.expander(label):
-                filtered_data = processed_data[processed_data['Attendance_Category'] == category] if category != "-" else processed_data[processed_data['Feedback'].isna()]
+                filtered_data = processed_data[processed_data['Attendance_Category'] == category] if category != "-" else processed_data[processed_data['Feedback'].isna() | (processed_data['Feedback'] == "") | (processed_data['Feedback'] == "-")]
                 if not filtered_data.empty:
                     st.dataframe(filtered_data[['Name', 'Join_Time', 'Leave_Time', 'Duration (minutes)', 'Login_Count', 'Logout_Count', 'Feedback']])
                 else:
