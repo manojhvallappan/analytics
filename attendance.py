@@ -12,8 +12,7 @@ def process_attendance_data(data):
         'Feedback': 'Feedback',
         'Times of Login': 'Login_Count',
         'Times of Logout': 'Logout_Count',
-        'Rating': 'Rating',
-        'Poll Response': 'Poll_Response'  # Simulate poll response column
+        'Rating': 'Rating'
     }, inplace=True)
 
     data['Join_Time'] = pd.to_datetime(data['Join_Time'], errors='coerce')
@@ -21,15 +20,18 @@ def process_attendance_data(data):
 
     data['Duration_Minutes'] = (data['Leave_Time'] - data['Join_Time']).dt.total_seconds() / 60
 
-    # Categorize attendance based on duration and poll responses
+    # Categorize attendance based on duration
     data['Attendance_Category'] = 'ABSENT'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] > 100), 'Attendance_Category'] = 'PRESENT'
     data.loc[(data['Responded'] == 'OK') & (data['Duration_Minutes'] >= 70) & (data['Duration_Minutes'] <= 100), 'Attendance_Category'] = 'PARTIALLY PRESENT'
 
-    # Mark poll participation
-    data['Poll_Participated'] = data['Poll_Response'].apply(lambda x: 'YES' if pd.notna(x) else 'NO')
-    
-    # Track feedback status
+    # Poll Participation: Check if 'Poll_Response' exists
+    if 'Poll_Response' in data.columns:
+        data['Poll_Participated'] = data['Poll_Response'].apply(lambda x: 'YES' if pd.notna(x) else 'NO')
+    else:
+        data['Poll_Participated'] = 'NO DATA'
+
+    # Feedback Status
     data['Feedback_Submitted'] = data['Feedback'].apply(lambda x: 'YES' if x != '-' else 'NO')
 
     return data
